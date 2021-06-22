@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -6,10 +7,12 @@ using Skladik.NewComponents;
 using Skladik.Utils;
 using Skladik.Adapters;
 
-namespace Skladik.Forms {
-	class DynOrgCreationForm: DynForm {
+namespace Skladik.Forms
+{
+	class DynOrgCreationForm : DynForm
+	{
 
-		public TableLayoutPanel formContent { get; private set; }
+		//public TableLayoutPanel formContent { get; private set; }
 		public Label LTitle { get; private set; }
 		public Label LName { get; private set; }
 		public TextBox TbName { get; private set; }
@@ -23,7 +26,8 @@ namespace Skladik.Forms {
 
 		private DynRegisterForm RegistrationForm;
 
-		public DynOrgCreationForm() {
+		public DynOrgCreationForm()
+		{
 			formContent = new TableLayoutPanel();
 			LTitle = new Label();
 			LName = new Label();
@@ -41,6 +45,12 @@ namespace Skladik.Forms {
 			BnbButtons.NextClick += NextButtonClick;
 
 			#region Свойства компонентов 
+
+			LTitle.Text = "Новая организация";
+			LTitle.AutoSize = true;
+			LTitle.Anchor = AnchorStyles.None;
+			LTitle.Font = new Font("Helvetica", 25);
+			LTitle.TextAlign = ContentAlignment.MiddleCenter;
 
 			LName.Text = "Название";
 			Styles.TextStyle(LName);
@@ -67,10 +77,7 @@ namespace Skladik.Forms {
 			PbPreView.BackgroundImage = Properties.Resources.no_image;
 
 			BnbButtons.BBack.Font = Styles.TextFont;
-			BnbButtons.BBack.BackColor = Color.Orange;
-
 			BnbButtons.BNext.Font = Styles.TextFont;
-			BnbButtons.BNext.BackColor = Color.Orange;
 
 			#endregion
 
@@ -79,62 +86,62 @@ namespace Skladik.Forms {
 			// Вся стр
 			formContent.Dock = DockStyle.Fill;
 
-													// Столбцы
+			// Столбцы
 			formContent.ColumnCount = 3;
 			formContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 12));
 			formContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 76));
 			formContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 12));
 
-													// Строки
+			// Строки
 			formContent.RowCount = 15;
 
-													// Пустой промежуток
+			// Пустой промежуток
 			formContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
 
-													// Заголовок
+			// Заголовок
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Пустой промежуток
+			// Пустой промежуток
 			formContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-													// Название
+			// Название
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Поле
+			// Поле
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Электронный адрес
+			// Электронный адрес
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Поле
+			// Поле
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Телефон
+			// Телефон
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Поле
+			// Поле
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Компонент открытия 
-													// изображений
+			// Компонент открытия 
+			// изображений
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Пустой промежуток
+			// Пустой промежуток
 			formContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-													// Картинка
+			// Картинка
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Пустой промежуток
+			// Пустой промежуток
 			formContent.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
-			
-													// Кнопки
+
+			// Кнопки
 			formContent.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-													// Пустой промежуток
+			// Пустой промежуток
 			formContent.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
 
-													// Добавление компонентов
+			// Добавление компонентов
 			formContent.Controls.Add(LTitle, 1, 1);
 			formContent.Controls.Add(LName, 1, 3);
 			formContent.Controls.Add(TbName, 1, 4);
@@ -149,23 +156,33 @@ namespace Skladik.Forms {
 			#endregion
 
 		}
-		
-													// Генерация формы
-		public override void Generate(Form1 aForm) {
-			base.Generate(aForm);
 
+		protected override void SetUpMainForm()
+		{
 			programForm.Controls.Clear();
 			Size FormSize = new Size(380, 600);
 			programForm.MinimumSize = FormSize;
-			aForm.MaximumSize = FormSize;
+			programForm.MaximumSize = FormSize;
 			programForm.Size = FormSize;
 			programForm.Text = "Создание организации";
+		}
+
+
+		// Генерация формы
+		public override void Generate(Form1 aForm)
+		{
+
+			base.Generate(aForm);
+
 			programForm.Controls.Add(formContent);
+
 
 		}
 
-		public void Generate(Form1	aForm, DynRegisterForm regForm) {
-			
+
+		public void Generate(Form1 aForm, DynRegisterForm regForm)
+		{
+
 			this.Generate(aForm);
 
 			RegistrationForm = regForm;
@@ -173,47 +190,67 @@ namespace Skladik.Forms {
 		}
 
 
-													// Выгрузка изображения на форму
-		private void PictureBoxLoadImage(Object s, EventArgs e) {
-			PbPreView.BackgroundImage = Image.FromFile(OiString.FileName);
+		// Выгрузка изображения на форму
+		private void PictureBoxLoadImage(Object s, EventArgs e)
+		{
+
+			// Проверка объема изображения
+			if (QueryUtils.CheckImageWeight(OiString.FileName, 4200000))
+				PbPreView.BackgroundImage = Image.FromFile(OiString.FileName);
+
+			else
+				MessageBox.Show("Объем изображения не должен превышать 4 МБ");
+
 		}
 
-													// Нажатие на кнопку назад
-		private void BackButtonClick(Object s, EventArgs e) {
-			programForm.User.History.Pop().Generate(programForm);
+		// Нажатие на кнопку назад
+		private void BackButtonClick(Object s, EventArgs e)
+		{
+			programForm.History.Pop().RegenerateOldForm();
 		}
 
-													// Кнопка Далее
-		private void NextButtonClick(Object s, EventArgs e) {
+		// Кнопка Далее
+		private void NextButtonClick(Object s, EventArgs e)
+		{
 
 			string Name = TbName.Text.Trim();
 			string Email = TbEmail.Text.Trim();
 			string Phone = TbPhone.Text.Trim();
 			Image Img = PbPreView.BackgroundImage;
-			
-													// Проверка названия организации
-			if (!QueryUtils.CheckOrganizationName(Name)) {
+
+			// Проверка названия организации
+			if (!QueryUtils.CheckName(Name))
+			{
 				MessageBox.Show("Название организации должно содержать от 4 до 50 символов, а так же не может сожержать спец. символы");
 				return;
 			}
 
-													// Проверка формата электронного адреса
-			if (!QueryUtils.CheckEmail(Email)) {
+			// Проверка формата электронного адреса
+			if (!QueryUtils.CheckEmail(Email))
+			{
 				MessageBox.Show("Электронный адрес неправильного формата");
 				return;
 			}
-			
-													// Проверка формата телефона
-			if (!QueryUtils.CheckPhone(Phone)) {
+
+			// Проверка формата телефона
+			if (!QueryUtils.CheckPhone(Phone))
+			{
 				MessageBox.Show("Телефон неправильного формата, формат телефона: +79999999999 или 89999999999");
 				return;
 			}
-			
+
+			// Проверка уникальности адреса
+			if (!QueryUtils.CheckEmailUnique(programForm.Conn, "organization", "email", Email))
+			{
+				MessageBox.Show("Данный электронный адрес уже есть в системе");
+				return;
+			}
 
 			// Если передана форма регистрации
-				// Регистрация человека
-				// Вход в систему
-			if (RegistrationForm != null) {
+			// Регистрация человека
+			// Вход в систему
+			if (RegistrationForm != null)
+			{
 				programForm.User.Register(
 					RegistrationForm.TbName.Text,
 					RegistrationForm.TbEmail.Text,
@@ -226,23 +263,26 @@ namespace Skladik.Forms {
 				);
 			}
 
-													// Создание организации
+			// Создание организации
 			OrganizationDataAdapter NewOrg = new OrganizationDataAdapter(programForm.User.Conn);
-			
+
 			NewOrg.Register(Name, Email, Phone, Img);
 
 			programForm.User.Organization = NewOrg;
 
-													// Привязка человека
+			// Привязка человека
 			NewOrg.AttachUser(programForm.User.Id);
 
 			// Если передана форма регистрации
+			if (RegistrationForm != null)
 				// Переход на форму товаров
-				// new DynProductsbandForm().Generate(aForm);
-			// Если не передана
-				// Переход назад
+				new DynProductsBandForm().Generate(programForm);
 
-			MessageBox.Show("Переход на форму ленты товаров");
+			// Если не передана
+			else
+				// Переход назад
+				programForm.History.Pop().RegenerateOldForm();
+
 
 		}
 

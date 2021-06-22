@@ -112,7 +112,7 @@ create table operation(
 
 	product_id int unsigned,
 	index(product_id),
-	foreign	key (product_id) references balance(product_id)
+	foreign key (product_id) references balance(product_id)
 		on delete cascade
 		on update cascade,
 
@@ -146,3 +146,18 @@ create table buy_order(
 
 	order_sum int unsigned
 );
+
+select p.id, b.quantity as quant, s.name as sel_name, p.name as prod_name, p.img, p.added_on, p.price, m.name as m_unit 
+from product p, organization s, measure_unit m, balance b 
+where p.measure_unit_id = m.id and p.id = b.product_id;
+
+
+
+insert into category(name)
+values
+("Крупы"),
+("Корм для животных"),
+("Мясо"),
+("Овощи"),
+("Рыба"),
+("Фрукты");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 
 using Skladik.Utils;
@@ -19,18 +20,24 @@ namespace Skladik
 
 		public UserDataAdapter User { get; private set; }
 
+		public Stack<DynForm> History { get; private set; }
+
 		public Form1()
 		{
 			InitializeComponent();
 
 			Conn = QueryUtils.GetConnection();
 			User = new UserDataAdapter(Conn);
+			History = new Stack<DynForm>();
 
 		}
 
+		// int i = 1;
+
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			 new DynAuthForm().Generate(this);
+			new DynAuthForm().Generate(this);
+
 			if (!QueryUtils.CheckConnection(Conn))
 				MessageBox.Show("Ну удалось установить соединение с БД");
 

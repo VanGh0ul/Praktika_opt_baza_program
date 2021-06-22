@@ -96,7 +96,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Adapters\BandAdapters\BandAdapter.cs" />
+    <Compile Include="Adapters\BandAdapters\FilterableBandAdapter.cs" />
+    <Compile Include="Adapters\BandAdapters\ProductBandAdapter.cs" />
     <Compile Include="Adapters\OrganizationDataAdapter.cs" />
+    <Compile Include="Adapters\ProductDataAdapter.cs" />
     <Compile Include="Adapters\UserDataAdapter.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -107,6 +110,7 @@
     <Compile Include="Forms\DynAuthForm.cs" />
     <Compile Include="Forms\DynForm.cs" />
     <Compile Include="Forms\DynOrgCreationForm.cs" />
+    <Compile Include="Forms\DynProductForm.cs" />
     <Compile Include="Forms\DynProductsBandForm.cs" />
     <Compile Include="Forms\DynRegisterForm.cs" />
     <Compile Include="NewComponents\BackNextButtons.cs">
@@ -141,6 +145,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\Balance.cs" />
+    <Compile Include="Utils\Operation.cs" />
     <Compile Include="Utils\QueryUtils.cs" />
     <Compile Include="Utils\Styles.cs" />
     <EmbeddedResource Include="Form1.resx">

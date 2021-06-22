@@ -24,31 +24,28 @@ namespace Skladik.NewComponents {
 				NextClick(BNext, new EventArgs());
 			};
 
-			BBack.Text = "Назад";
-
+			BBack.Text = "<";
 			BBack.Dock = DockStyle.Fill;
-	
-			BBack.Height = 55;
+			BBack.Height = 30;
 
 			BNext.Text = "Далее";
 			BNext.Dock = DockStyle.Fill;
-	
 
 			this.AutoSize = true;
 
-			 //this.CellBorderStyle = TableLayoutPanelCellBorderStyle.Inset;
+			// this.CellBorderStyle = TableLayoutPanelCellBorderStyle.Inset;
 
 			this.ColumnCount = 3;
 			this.RowCount = 1;
 
-			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75));
-			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75));
+			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
 			this.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			this.Controls.Add(BBack, 0, 2);
-			this.Controls.Add(BNext, 3, 2);
+			this.Controls.Add(BBack, 1, 0);
+			this.Controls.Add(BNext, 2, 0);
 
 		}
 

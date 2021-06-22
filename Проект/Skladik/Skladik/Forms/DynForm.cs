@@ -2,14 +2,41 @@
 
 using Skladik.Adapters;
 
-namespace Skladik.Forms {
-	public class DynForm {
+namespace Skladik.Forms
+{
+	public class DynForm
+	{
 
 		protected Form1 programForm;
 
-		public virtual void Generate(Form1 aForm) {
+		protected TableLayoutPanel formContent;
+
+		// Настройка формы
+		protected virtual void SetUpMainForm() { }
+
+		// Возврат старой формы
+		private void ReturnForm()
+		{
+			programForm.Controls.Clear();
+			programForm.Controls.Add(formContent);
+		}
+
+		// Используется для возврвщаения назад по формам
+		public void RegenerateOldForm()
+		{
+			if (programForm != null && formContent != null)
+			{
+				SetUpMainForm();
+				ReturnForm();
+			}
+
+		}
+
+		// Настройка формы
+		public virtual void Generate(Form1 aForm)
+		{
 			programForm = aForm;
-			// aForm.User.History.Push(this);
+			SetUpMainForm();
 		}
 
 	}

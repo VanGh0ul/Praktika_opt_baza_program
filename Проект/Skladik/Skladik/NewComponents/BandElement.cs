@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 using Skladik.Utils;
@@ -8,37 +9,69 @@ namespace Skladik.NewComponents {
 													// Класс элемента ленты товаров
 	public class BandElement : TableLayoutPanel {
 
-		public int ProductId { get; private set; }
-		public PictureBox PbImage { get; private set; }
-		public Label LName { get; private set; }
-		public Label LPrice { get; private set; }
-		public Label LCount { get; private set; }
-		public Label LAddDate { get; private set; }
-		public Label LOrgName { get; private set; }
+		public int ProductId { get; set; }
+		public PictureBox PbImage { get; set; }
+		public Label LName { get; set; }
+		public Label LPrice { get; set; }
+		public Label LCount { get; set; }
+		public Label LAddDate { get; set; }
+		public Label LOrgName { get; set; }
+		public string MeasureUnit { get; set; }
 
-		public BandElement(int id, Image img, string name, string price, string count, string addDate, string orgName)
+		public event EventHandler ProductClicked;
+
+		public BandElement(int id, Image img, string name, string price, string count, string addDate, string orgName, string measureUnit)
 			: this() {
+
 													// Передача значений	
 			ProductId = id;
+			PbImage.BackgroundImage = img;
+			LName.Text = name;
+			LPrice.Text = price;
+			LCount.Text = count;
+			LAddDate.Text = addDate;
+			LOrgName.Text = orgName;
+			MeasureUnit = measureUnit;
+
+		}
+
+		public BandElement() {
+			
+			PbImage = new PictureBox();
+			LName = new Label();
+			LPrice = new Label();
+			LCount = new Label();
+			LAddDate = new Label();
+			LOrgName = new Label();
+
+			this.Click += UnionClick;
+			PbImage.Click += UnionClick;
+			LName.Click += UnionClick;
+			LPrice.Click += UnionClick;
+			LCount.Click += UnionClick;
+			LAddDate.Click += UnionClick;
+			LOrgName.Click += UnionClick;
+
 
 			#region Свойства компонентов
-			PbImage.BackgroundImage = img;
+
 			PbImage.BackgroundImageLayout = ImageLayout.Zoom;
 			PbImage.Dock = DockStyle.Fill;
 
-			LName.Text = name;
+			// this.BackColor = SystemColors.ActiveCaptionText; Цвет элкментов ленты а поч продублировалось много раз
+			
 			Styles.TextStyle(LName);
 
-			LPrice.Text = price;
+			
 			Styles.TextStyle(LPrice);
 
-			LCount.Text = count;
+			
 			Styles.TextStyle(LCount);
 
-			LAddDate.Text = addDate;
+			
 			Styles.TextStyle(LAddDate);
 
-			LOrgName.Text = orgName;
+			
 			Styles.TextStyle(LOrgName);
 			#endregion
 
@@ -90,17 +123,13 @@ namespace Skladik.NewComponents {
 			Controls.Add(LAddDate, 1, 6);
 			Controls.Add(LOrgName, 1, 7);
 
+
 		}
 
-		public BandElement() {
-			
-			PbImage = new PictureBox();
-			LName = new Label();
-			LPrice = new Label();
-			LCount = new Label();
-			LAddDate = new Label();
-			LOrgName = new Label();
-
+													// Объединение нажатий на элементы карточки
+		private void UnionClick(Object s, EventArgs e) {
+			if (ProductClicked != null)
+				ProductClicked(this, new EventArgs());
 		}
 	
 	}

@@ -5,8 +5,10 @@ using MySql.Data.MySqlClient;
 
 using Skladik.Utils;
 
-namespace Skladik.Adapters {
-	public class OrganizationDataAdapter {
+namespace Skladik.Adapters
+{
+	public class OrganizationDataAdapter
+	{
 
 		public MySqlConnection Conn { get; private set; }
 		public int Id { get; private set; }
@@ -17,17 +19,19 @@ namespace Skladik.Adapters {
 		public Image Img { get; private set; }
 		public DateTime RegDate { get; private set; }
 
-		public OrganizationDataAdapter(MySqlConnection conn) {
+		public OrganizationDataAdapter(MySqlConnection conn)
+		{
 			Conn = conn;
 		}
 
-													// Создание организации
-		public void Register(string name, string email, string phone, Image img) { 
-		
-													// Добавление организации
+		// Создание организации
+		public void Register(string name, string email, string phone, Image img)
+		{
+
+			// Добавление организации
 			MySqlCommand InsertCommand = Conn.CreateCommand();
-			InsertCommand.CommandText = 
-				"insert into organization(name, email, phone, avatar, reg_date) " + 
+			InsertCommand.CommandText =
+				"insert into organization(name, email, phone, avatar, reg_date) " +
 				"values (@name, @email, @phone, @img, @reg_date)";
 
 			InsertCommand.Parameters.Add("name", MySqlDbType.VarChar).Value = name;
@@ -42,7 +46,7 @@ namespace Skladik.Adapters {
 
 			Conn.Close();
 
-													// Получение её ид
+			// Получение её ид
 			MySqlCommand LastIdSelect = Conn.CreateCommand();
 			LastIdSelect.CommandText = "select last_insert_id() as id";
 
@@ -61,12 +65,13 @@ namespace Skladik.Adapters {
 			GetData(Id);
 
 		}
-		
-													// Связка с пользователем по ид
-		public void AttachUser(int id) { 
-												
+
+		// Связка с пользователем по ид
+		public void AttachUser(int id)
+		{
+
 			MySqlCommand Query = Conn.CreateCommand();
-			Query.CommandText = 
+			Query.CommandText =
 				"insert into organization_content(organization_id, user_id) " +
  				"values (@org_id, @user_id)";
 
@@ -80,9 +85,10 @@ namespace Skladik.Adapters {
 			Conn.Close();
 
 		}
-		
-													// Получение данных о организации
-		public bool GetData(int id) { 
+
+		// Получение данных о организации
+		public bool GetData(int id)
+		{
 
 			MySqlCommand Query = Conn.CreateCommand();
 			Query.CommandText = "select * from organization where id = @id";
@@ -93,26 +99,26 @@ namespace Skladik.Adapters {
 
 			Conn.Open();
 
-													// Выгрузка данных
+			// Выгрузка данных
 			MySqlDataReader QueryReader = Query.ExecuteReader();
 
-			if (QueryReader.HasRows) {
+			if (QueryReader.HasRows)
+			{
 
 				QueryReader.Read();
 
 				Id = id;
 				Name = QueryReader.GetString("name");
 
-                if (!QueryReader.IsDBNull(2))
-                {
+				if (!QueryReader.IsDBNull(2))
 					About = QueryReader.GetString(2);
-                }
 
 				Email = QueryReader.GetString("email");
 				Phone = QueryReader.GetString("phone");
 				Img = QueryUtils.GetImageFromByteArray((byte[])QueryReader["avatar"]);
 
-			} else
+			}
+			else
 				Result = false;
 
 

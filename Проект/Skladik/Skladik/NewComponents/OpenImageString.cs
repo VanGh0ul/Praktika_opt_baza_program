@@ -2,7 +2,9 @@
 using System.Windows.Forms;
 
 namespace Skladik.NewComponents {
-	class OpenImageString : TableLayoutPanel {
+
+													// Класс используемый для выбора изображений
+	public class OpenImageString : TableLayoutPanel {
 
 		public Label LComment { get; private set; }
 		public Button BOpenImg { get; private set; }

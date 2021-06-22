@@ -11,10 +11,12 @@ using Skladik.Utils;
 using Skladik.Adapters.BandAdapters;
 using DbExtensions;
 
-namespace Skladik.Forms {
-	class DynAuthForm : DynForm{
+namespace Skladik.Forms
+{
+	class DynAuthForm : DynForm
+	{
 
-		public TableLayoutPanel formContent { get; private set; }
+		// public TableLayoutPanel formContent { get; private set; }
 		public Label LTitle { get; private set; }
 		public Label LEmail { get; private set; }
 		public TextBox TbEmail { get; private set; }
@@ -24,9 +26,8 @@ namespace Skladik.Forms {
 		public Label LRegister { get; private set; }
 
 
-		public DynAuthForm() {
-
-			//collor form DAE8FC
+		public DynAuthForm()
+		{
 
 			formContent = new TableLayoutPanel();
 			LTitle = new Label();
@@ -37,38 +38,43 @@ namespace Skladik.Forms {
 			BAuth = new Button();
 			LRegister = new Label();
 
+			// formContent.CellBorderStyle = TableLayoutPanelCellBorderStyle.Inset;
+
 			BAuth.Click += AuthButtonClick;
 			LRegister.Click += RegistrationFormOpenButton;
 
+			// Temporary
+			TbEmail.Text = "attacheduser@skladik.ru";
+			PfPassword.TextField.Text = "Qwe123";
+			// --/
+
 			#region Свойства компонентов
+
+			LTitle.Text = "Вход";
+			LTitle.AutoSize = true;
+			LTitle.Anchor = AnchorStyles.None;
+			LTitle.Font = new Font("Helvetica", 25);
 
 			LEmail.Text = "Электронный адрес";
 			Styles.TextStyle(LEmail);
-			LEmail.Font = new Font("Comic Sans MS", 12);
 
 			Styles.TextBoxStyle(TbEmail);
-			TbEmail.Font = new Font("Comic Sans MS", 12);
 
 			LPassword.Text = "Пароль";
 			Styles.TextStyle(LPassword);
-			LPassword.Font = new Font("Comic Sans MS", 12);
 
 			PfPassword.Dock = DockStyle.Fill;
 			PfPassword.TextField.Font = Styles.TextFont;
-			BAuth.Width = 220;
-			BAuth.Height = 30;
 			PfPassword.ViewButton.BackgroundImageLayout = ImageLayout.Zoom;
 			PfPassword.ViewButton.BackgroundImage = Properties.Resources.see_password;
 
 			BAuth.Text = "Вход";
-			BAuth.Width = 220;
-			BAuth.Height = 30;
-			BAuth.Font = new Font("Comic Sans MS", 12, FontStyle.Underline);
+			BAuth.Width = 120;
 			BAuth.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
 			BAuth.Font = Styles.TextFont;
 
 			LRegister.Text = "Регистрация";
-			LRegister.Font = new Font("Comic Sans MS", 12, FontStyle.Underline);
+			LRegister.Font = new Font("Helvetica", 10, FontStyle.Underline);
 			LRegister.Cursor = Cursors.Hand;
 			LRegister.ForeColor = Color.Blue;
 			LRegister.Anchor = AnchorStyles.None;
@@ -119,7 +125,7 @@ namespace Skladik.Forms {
 			// Пустой промежуток
 			formContent.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
 
-			
+
 			formContent.Controls.Add(LTitle, 1, 1);
 			formContent.Controls.Add(LEmail, 1, 3);
 			formContent.Controls.Add(TbEmail, 1, 4);
@@ -127,56 +133,61 @@ namespace Skladik.Forms {
 			formContent.Controls.Add(PfPassword, 1, 7);
 			formContent.Controls.Add(BAuth, 1, 9);
 			formContent.Controls.Add(LRegister, 1, 10);
-			
+
 			#endregion
 
 		}
 
-													// Генерация формы авторизации
-		public override void Generate(Form1 aForm) {
-			
-			base.Generate(aForm);
-
+		protected override void SetUpMainForm()
+		{
 			programForm.Controls.Clear();
-			Size FormSize = new Size(550, 450);
-			programForm.BackColor = Color.LightBlue;
+			Size FormSize = new Size(400, 400);
 			programForm.MinimumSize = FormSize;
-			aForm.MaximumSize = FormSize;
+			programForm.MaximumSize = FormSize;
 			programForm.Size = FormSize;
-			programForm.Text = "Авторизация";
+			programForm.Text = "Вход";
+		}
+
+
+		// Генерация формы авторизации
+		public override void Generate(Form1 aForm)
+		{
+
+			base.Generate(aForm);
 			programForm.Controls.Add(formContent);
 
 		}
 
 
-													// Вход в систему
-		private void AuthButtonClick(Object s, EventArgs e) {
+		// Вход в систему
+		private void AuthButtonClick(Object s, EventArgs e)
+		{
 
 			string Email = TbEmail.Text.Trim();
 			string Pass = PfPassword.TextField.Text.Trim();
 
 			// Проверка электронной почты
-			if (!QueryUtils.CheckEmail(Email)) {
+			if (!QueryUtils.CheckEmail(Email))
+			{
 				MessageBox.Show("Электронная почта имеет неправильный формат");
 				return;
 			}
 
 			if (QueryUtils.CheckPassword(Pass) && programForm.User.Auth(Email, Pass))
 				// Переход на форму товаров
-				// new DynProductsbandForm().Generate(aForm);
-
-				MessageBox.Show("Переход на форму ленты товаров");
+				new DynProductsBandForm().Generate(programForm);
 
 			else
 				MessageBox.Show("Логин/пароль введен неверно");
 		}
 
-													// Перемещение на форму регистрации
-		private void RegistrationFormOpenButton(Object s, EventArgs e) {
+		// Перемещение на форму регистрации
+		private void RegistrationFormOpenButton(Object s, EventArgs e)
+		{
 			new DynRegisterForm().Generate(programForm);
-			programForm.User.History.Push(this);
+			programForm.History.Push(this);
 		}
-	
+
 
 	}
 }

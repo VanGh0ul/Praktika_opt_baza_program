@@ -8,11 +8,13 @@ using Skladik.Forms;
 using Skladik.Adapters;
 using Skladik.Utils;
 
-namespace Skladik.Forms {
+namespace Skladik.Forms
+{
 
-	class DynRegisterForm : DynForm {
+	class DynRegisterForm : DynForm
+	{
 
-		public TableLayoutPanel formContent { get; private set; }
+		// public TableLayoutPanel formContent { get; private set; }
 
 		public Label LTitle { get; private set; }
 
@@ -35,8 +37,9 @@ namespace Skladik.Forms {
 		private BackNextButtons BackNext;
 
 
-		public DynRegisterForm() {
-			
+		public DynRegisterForm()
+		{
+
 			formContent = new TableLayoutPanel();
 			LTitle = new Label();
 			LName = new Label();
@@ -61,7 +64,7 @@ namespace Skladik.Forms {
 			LTitle.Text = "Регистрация";
 			LTitle.AutoSize = true;
 			LTitle.Anchor = AnchorStyles.None;
-			LTitle.Font = new Font("Comic Sans MS", 25);
+			LTitle.Font = new Font("Helvetica", 25);
 
 			LName.Text = "ФИО";
 			Styles.TextStyle(LName);
@@ -87,9 +90,9 @@ namespace Skladik.Forms {
 			RbCreateOrganization.AutoSize = true;
 			RbCreateOrganization.Font = Styles.TextFont;
 
-			RbCreateWorker.Text = "Создать работника";
+			RbCreateWorker.Text = "Работник";
 			RbCreateWorker.AutoSize = true;
-			RbCreateWorker.Font  = Styles.TextFont;
+			RbCreateWorker.Font = Styles.TextFont;
 			//RbCreateWorker.Top = 50;
 			RbCreateWorker.Checked = true;
 
@@ -98,15 +101,9 @@ namespace Skladik.Forms {
 			FlpChoose.AutoSize = true;
 			FlpChoose.Controls.Add(RbCreateOrganization);
 			FlpChoose.Controls.Add(RbCreateWorker);
-			
+
 			BackNext.BBack.Font = Styles.TextFont;
-			BackNext.BBack.BackColor = Color.Orange;
-			BackNext.BBack.Font = new Font("Comic Sans MS", 12);
-
 			BackNext.BNext.Font = Styles.TextFont;
-			BackNext.BNext.BackColor = Color.Orange;
-			BackNext.BNext.Font = new Font("Comic Sans MS", 12);
-
 			#endregion
 
 			#region Таблица
@@ -182,80 +179,98 @@ namespace Skladik.Forms {
 
 			#endregion
 		}
-													// Генерация формы регистрации
-		public override void Generate(Form1 aForm) {
+
+
+		protected override void SetUpMainForm()
+		{
+			programForm.Controls.Clear();
+			Size FormSize = new Size(400, 500);
+			programForm.MinimumSize = FormSize;
+			programForm.MaximumSize = FormSize;
+			programForm.Size = FormSize;
+			programForm.Text = "Регистрация";
+		}
+
+
+		// Генерация формы регистрации
+		public override void Generate(Form1 aForm)
+		{
 
 			base.Generate(aForm);
 
 			programForm.Controls.Clear();
-			Size FormSize = new Size(400, 500);
-			programForm.BackColor = Color.LightBlue;
-			programForm.MinimumSize = FormSize;
-			aForm.MaximumSize = FormSize;
-			programForm.Size = FormSize;
-			programForm.Text = "Регистрация";
 			programForm.Controls.Add(formContent);
 
 		}
 
 
-													// Кнопка регистрации
-		private void RegistrationButtonClick(Object s, EventArgs e) {
-			
-			string Name = TbName.Text.Trim(); 
+		// Кнопка регистрации
+		private void RegistrationButtonClick(Object s, EventArgs e)
+		{
+
+			string Name = TbName.Text.Trim();
 			string Email = TbEmail.Text.Trim();
 			string Pass = PfPassword.TextField.Text.Trim();
 			string RepeatPass = PfRepeatPassword.TextField.Text.Trim();
 
-													// Проверка электронной почты
-			if (!QueryUtils.CheckEmail(Email)) {
-				MessageBox.Show("Электронная почта имеет неправильный формат");
+			// Проверка электронной почты
+			if (!QueryUtils.CheckEmail(Email))
+			{
+				MessageBox.Show("Электронаня почта имеет неправильный формат");
 				return;
 			}
 
-													// Проверка имени пользователя
-			if (!QueryUtils.CheckUserName(Name)) {
+			// Проверка имени пользователя
+			if (!QueryUtils.CheckName(Name))
+			{
 				MessageBox.Show("Имя пользователя слишком длинное либо содержит неподдерживаемые символы");
 				return;
 			}
-													// Проверка пароля
-			if (!QueryUtils.CheckPassword(Pass)) {
+			// Проверка пароля
+			if (!QueryUtils.CheckPassword(Pass))
+			{
 				MessageBox.Show("Пароль должен содержать от 6 до 16 символов, а так же содержать хотябы 1 заглавную букву и цифру");
 				return;
 			}
 
-			if (Pass != RepeatPass) {
+			if (Pass != RepeatPass)
+			{
 				MessageBox.Show("Пароли не совпадают");
 				return;
 			}
 
-													// Проверка ункальности эл. адреса
+			// Проверка ункальности эл. адреса
 
-			if (!QueryUtils.CheckUserEmailUnique(programForm.Conn, Email)) {
+			if (!QueryUtils.CheckEmailUnique(programForm.Conn, "user", "email", Email))
+			{
 				MessageBox.Show("Данный электронный адрес уже есть в системе");
 				return;
 			}
 
 
-													// Если выбрано "Создать рабочего" (непривязанный пользователь)
-			if (RbCreateWorker.Checked) {
+			// Если выбрано "Создать рабочего" (непривязанный пользователь)
+			if (RbCreateWorker.Checked)
+			{
 				programForm.User.Register(Name, Email, Pass);
 				programForm.User.Auth(Email, Pass);
-													// Переход на форму товаров
+				// Переход на форму товаров
 				new DynProductsBandForm().Generate(programForm);
-									
-													// Создать организацию
-			} else {
+
+				// Создать организацию
+			}
+			else
+			{
 				new DynOrgCreationForm().Generate(programForm, this);
-				programForm.User.History.Push(this);
+				programForm.History.Push(this);
 			}
 		}
-		
-													// Переход на форму авторизации
-		private void RegistrationFormBackButton(Object s, EventArgs e) {
-			programForm.User.History.Pop().Generate(programForm);
+
+		// Переход на форму авторизации
+		private void RegistrationFormBackButton(Object s, EventArgs e)
+		{
+			programForm.History.Pop().RegenerateOldForm();
 		}
-	
+
 
 
 	}

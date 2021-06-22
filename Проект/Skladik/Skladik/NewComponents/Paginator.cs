@@ -12,27 +12,63 @@ namespace Skladik.NewComponents {
 
 		private List<Label> labels;
 		public int ChoosedPage { get; private set; }
-		private int labelCount;
-		private int pageCount = 1;
+		public int LabelCount { get; set; }
+		private int pageCount = 0;
+
+		public int PageCount { 
+			get { return pageCount; }
+			set { 
+				pageCount = value;
+
+				ChoosedPage = 1;
+
+				Redraw();
+				LightSelected();
+			} 
+		}
+
 		private int labelOffset = 1;
 
 
 		public event EventHandler PageChanged;
 
-		public Paginator(int pageCount, int labelCount) {
+		public Paginator() {
+			
 			this.WrapContents = false;
 			this.AutoSize = true;
 			this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-
-			this.labelCount = labelCount;
 
 			ChoosedPage = 1;
 
 			labels = new List<Label>();
 
-			this.pageCount = pageCount;
+		}
 
-			for (int i = 0; i < labelCount ; i++) {
+		public Paginator(int labelCount) : this() {
+
+			LabelCount = labelCount;
+
+			CreateLabels();
+
+		}
+
+		public Paginator(int pageCount, int labelCount) : this() {
+
+			LabelCount = labelCount;
+
+			PageCount = pageCount;
+
+			CreateLabels();
+
+		}
+
+													// Пересоздает все поля
+		public void CreateLabels() {
+
+			labels.Clear();
+			this.Controls.Clear();
+
+			for (int i = 0; i < LabelCount ; i++) {
 				
 				Label NewLabel = new Label();
 
@@ -47,7 +83,7 @@ namespace Skladik.NewComponents {
 			Redraw();
 
 			foreach (Label Elem in labels)
-				this.Controls.Add(Elem);
+			this.Controls.Add(Elem);
 
 			LightSelected();
 		}
@@ -60,15 +96,15 @@ namespace Skladik.NewComponents {
 			else 
 				labels[0].Text = "1";
 
-			if (labelOffset + labelCount < pageCount)
-				labels[labelCount - 1].Text = ">";
+			if (labelOffset + LabelCount < PageCount)
+				labels[LabelCount - 1].Text = ">";
 			else
-				labels[labelCount - 1].Text = "";
+				labels[LabelCount - 1].Text = "";
 
-			for (int i = 1; i < labelCount - 1; i++) { 
+			for (int i = 1; i < LabelCount - 1; i++) { 
 				string Temp;
 
-				if (labelOffset + i - 1 < pageCount)
+				if (labelOffset + i - 1 < PageCount)
 					Temp = (labelOffset + i).ToString();
 				else
 					Temp = "";
@@ -83,7 +119,8 @@ namespace Skladik.NewComponents {
 		private void LightSelected() {
 			foreach (Label Elem in labels) {
 				if (Elem.Text == ChoosedPage.ToString())
-					Elem.BackColor = SystemColors.ActiveCaptionText;
+					// Elem.BackColor = SystemColors.ActiveCaptionText; Это цвет активной страницы пагинатора
+					Elem.BackColor = Color.Aqua; // Потом поменяешь
 				else
 					Elem.BackColor = SystemColors.Control;
 			}
@@ -102,10 +139,10 @@ namespace Skladik.NewComponents {
 						PageChanged(this, new EventArgs());
 				}
 			} else if (ChoosedValue == "<") {
- 				labelOffset -= labelCount - 2;
+ 				labelOffset -= LabelCount - 2;
 				Redraw();
 			} else if (ChoosedValue == ">") {
-				labelOffset += labelCount - 2;
+				labelOffset += LabelCount - 2;
 				Redraw();
 			}
 

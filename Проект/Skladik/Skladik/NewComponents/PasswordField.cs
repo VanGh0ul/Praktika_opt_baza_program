@@ -20,7 +20,7 @@ namespace Skladik.NewComponents {
 
 			#region Свойства компонентов
 			TextField.PasswordChar = '*';
-			TextField.Margin = new Padding(3, 0, 0, 0);
+			TextField.Margin = new Padding(0, 0, 0, 0);
 			TextField.Dock = DockStyle.Fill;
 
 			ViewButton.Height = TextField.Height;
@@ -41,14 +41,14 @@ namespace Skladik.NewComponents {
 			this.ColumnCount = 2;
 			this.RowCount = 1;
 
-			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 90));
-			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
+			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80));
+			this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+
+			this.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
 			this.Controls.Add(TextField, 0, 0);
 			this.Controls.Add(ViewButton, 1, 0);
 
-			this.Controls.Add(TextField);
-			this.Controls.Add(ViewButton);
 			#endregion
 		}
 

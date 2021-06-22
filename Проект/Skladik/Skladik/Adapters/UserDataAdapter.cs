@@ -19,13 +19,12 @@ namespace Skladik.Adapters
 		public string Role { get; private set; }
 		public string Email { get; private set; }
 		public DateTime RegDate { get; private set; }
-		public Stack<DynForm> History { get; private set; }
 		public OrganizationDataAdapter Organization { get; set; }
 
 		public UserDataAdapter(MySqlConnection conn)
 		{
 			Conn = conn;
-			History = new Stack<DynForm>();
+
 		}
 
 		// Регистрация пользователя
@@ -162,8 +161,9 @@ namespace Skladik.Adapters
 
 					OrgId = SelectReader.GetInt32("org_id");
 
-					Organization = new OrganizationDataAdapter(Conn);
 					Conn.Close();
+					Organization = new OrganizationDataAdapter(Conn);
+
 					if (!Organization.GetData(OrgId))
 						Organization = null;
 

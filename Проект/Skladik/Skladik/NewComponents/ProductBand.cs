@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -17,7 +18,7 @@ namespace Skladik.NewComponents {
 			set {
 				dataSource = value;
 
-				if (ElementCreationStrategy != null)
+				if (dataSource != null && ElementCreationStrategy != null)
 					foreach (DataRow Row in dataSource.Rows)
 						AddElement(ElementCreationStrategy(new BandElement(), Row));
 			}
@@ -26,7 +27,10 @@ namespace Skladik.NewComponents {
 													// на основе строки таблицы из datasource
 		public DElementCreationStrategy ElementCreationStrategy { get; set; }
 
+		public event EventHandler ProductChoosed;
+
 		public ProductBand() {
+
 			FlowDirection = FlowDirection.LeftToRight;
 			WrapContents = true;
 			VerticalScroll.Enabled = true;
@@ -34,9 +38,14 @@ namespace Skladik.NewComponents {
 		}
 													// Добавление элемента
 		public void AddElement(BandElement elem) {
+			elem.ProductClicked += this.ProductClicked;
 			Controls.Add(elem);
 		}
 
-
+													// Было произведено нажатие на карточку
+		private void ProductClicked(Object s, EventArgs e) {
+			if (ProductChoosed != null)
+				ProductChoosed(s, e);
+		}
 	}
 }
