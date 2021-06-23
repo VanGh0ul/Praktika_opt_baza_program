@@ -85,7 +85,7 @@ namespace Skladik.NewComponents {
 						ChoosedPanel.BackColor = SystemColors.Control;// Цвеи для невыбранной категории
 						; 
 
-					NewChoosedPanel.BackColor = Color.Aqua;
+					NewChoosedPanel.BackColor = Color.Yellow;
 
 					ChoosedPanel = NewChoosedPanel;
 
@@ -99,7 +99,7 @@ namespace Skladik.NewComponents {
 		public void Reset() {
 
 			if (ChoosedPanel != null)
-				ChoosedPanel.BackColor = Color.Aqua; // Цвет для выбранной категорий
+				ChoosedPanel.BackColor = Color.Yellow; // Цвет для выбранной категорий
 
 			ChoosedPanel = null;
 		}

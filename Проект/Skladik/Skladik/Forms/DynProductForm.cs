@@ -1533,8 +1533,8 @@ namespace Skladik.Forms
 		private void DeleteButtonClick(Object s, EventArgs e)
 		{
 
-			// Изменение статус is_deleted
-			Product.Delete();
+			// Удаление товара
+			//Product.Delete();
 
 			// Переход на форму просмотра товаров
 			new DynProductsBandForm().Generate(programForm);

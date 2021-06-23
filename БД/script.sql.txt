@@ -147,6 +147,32 @@ create table buy_order(
 	order_sum int unsigned
 );
 
+create table order_content(
+	id int unsigned primary key auto_increment,
+
+	order_id int unsigned,
+	index(order_id),
+	foreign key (order_id) references buy_order(id)
+		on delete cascade
+		on update cascade,
+
+	product_id int unsigned,
+	index(product_id),
+	foreign key (product_id) references product(id)
+		on delete set null
+		on update set null,
+
+	quantity int unsigned,
+	product_name varchar(50),
+	product_price int unsigned,
+	product_measure_unit varchar(30),
+	pos_sum int unsigned,
+
+	unique index(order_id, product_id)
+);
+
+
+
 select p.id, b.quantity as quant, s.name as sel_name, p.name as prod_name, p.img, p.added_on, p.price, m.name as m_unit 
 from product p, organization s, measure_unit m, balance b 
 where p.measure_unit_id = m.id and p.id = b.product_id;

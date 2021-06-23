@@ -91,10 +91,9 @@ namespace Skladik.Adapters
 				MeasureUnitId = QueryReader.GetInt32("measure_unit_id");
 				CategoryId = QueryReader.GetInt32("category_id");
 
-				//int SellerId = QueryReader.GetInt32("seller_id");
+
 				Conn.Close();
 				// Получение данных поставщика
-				//Seller.GetData(SellerId);
 
 
 			}
@@ -252,24 +251,10 @@ namespace Skladik.Adapters
 
 		}
 
-		// "Удаление" товара
-		public void Delete()
-		{
+		//Cделать полное "Удаление" товара
 
-			// Изменеие статуса флага is_deleted
-			MySqlCommand Query = Conn.CreateCommand();
-			Query.CommandText = "update product set is_deleted = true where id = @id";
 
-			Query.Parameters.Add("id", MySqlDbType.Int32).Value = Id;
-
-			Conn.Open();
-
-			Query.ExecuteNonQuery();
-
-			Conn.Close();
-
-		}
-
+		// Добавление в заказ
 		// Добавление в заказ
 		public void AddToOrder(int orgId, int quantity)
 		{
@@ -277,15 +262,11 @@ namespace Skladik.Adapters
 			MySqlCommand Query = Conn.CreateCommand();
 
 			// Поиск заказа со статусом "в процессе оформления"
-			// направленного на данного поставщика
 			Query.CommandText =
 				"select o.id from buy_order o, order_status os " +
 				"where " +
-					"o.seller_id = @s_id and " +
 					"o.status_id = os.id and " +
 					"os.name = 'editing'";
-
-			Query.Parameters.Add("s_id", MySqlDbType.Int32).Value = Seller.Id;
 
 			Conn.Open();
 
@@ -392,11 +373,10 @@ namespace Skladik.Adapters
 				Query = Conn.CreateCommand();
 				Query.CommandText =
 					"insert into buy_order " +
-					"(buyer_id, seller_id, status_id) " +
-					"values (@b_id, @s_id, (select id from order_status where name = 'editing'))";
+					"(buyer_id, status_id) " +
+					"values (@b_id, (select id from order_status where name = 'editing'))";
 
 				Query.Parameters.Add("b_id", MySqlDbType.Int32).Value = orgId;
-				Query.Parameters.Add("s_id", MySqlDbType.Int32).Value = this.Seller.Id;
 
 				Conn.Open();
 

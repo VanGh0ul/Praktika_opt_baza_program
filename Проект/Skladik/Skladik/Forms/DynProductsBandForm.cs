@@ -138,7 +138,7 @@ namespace Skladik.Forms
 
 				// Формы заказов
 				BOutgoingOrders.Click += OutgoingOrderButtonClick;
-				BIncomingOrders.Click += IncomingOrderButtonClick;
+
 
 				// Вывод непривязанного пользователя
 			}
@@ -844,33 +844,33 @@ namespace Skladik.Forms
 
 			#region Кнопки заказов
 			BOutgoingOrders = new Button();
-			BIncomingOrders = new Button();
+			//BIncomingOrders = new Button();
 
 			BOutgoingOrders.Text = "Исхоящие заказы";
-			BIncomingOrders.Text = "Входящие заказы";
+			//BIncomingOrders.Text = "Входящие заказы";
 
 			BOutgoingOrders.Dock = DockStyle.Fill;
-			BIncomingOrders.Dock = DockStyle.Fill;
+			//BIncomingOrders.Dock = DockStyle.Fill;
 
 			Orders.Controls.Add(BOutgoingOrders, 0, 0);
-			Orders.Controls.Add(BIncomingOrders, 0, 1);
+			//Orders.Controls.Add(BIncomingOrders, 0, 1);
 			#endregion
 
 			#region Количество важных заказов
-			ImportantIncoming = new Label();
+			//ImportantIncoming = new Label();
 			ImportantOutgoing = new Label();
 
-			ImportantIncoming.Text = "0";
+			//ImportantIncoming.Text = "0";
 			ImportantOutgoing.Text = "0";
 
-			Styles.TextStyle(ImportantIncoming);
+			//Styles.TextStyle(ImportantIncoming);
 			Styles.TextStyle(ImportantOutgoing);
 
-			ImportantIncoming.Anchor = AnchorStyles.None;
+			//ImportantIncoming.Anchor = AnchorStyles.None;
 			ImportantOutgoing.Anchor = AnchorStyles.None;
 
 			Orders.Controls.Add(ImportantOutgoing, 1, 0);
-			Orders.Controls.Add(ImportantIncoming, 1, 1);
+			//Orders.Controls.Add(ImportantIncoming, 1, 1);
 
 			#endregion
 
@@ -1158,8 +1158,7 @@ namespace Skladik.Forms
 		{
 
 			string CommandText =
-				"p.name like @search or " +
-				"s.name like @search ";
+				"p.name like @search";
 
 			query.Parameters.Add("search", MySqlDbType.VarChar).Value = "%" + filterString + "%";
 
