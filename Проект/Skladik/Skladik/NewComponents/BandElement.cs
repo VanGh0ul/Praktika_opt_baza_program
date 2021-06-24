@@ -58,7 +58,6 @@ namespace Skladik.NewComponents {
 			PbImage.BackgroundImageLayout = ImageLayout.Zoom;
 			PbImage.Dock = DockStyle.Fill;
 
-			// this.BackColor = SystemColors.ActiveCaptionText; Цвет элкментов ленты а поч продублировалось много раз
 			
 			Styles.TextStyle(LName);
 

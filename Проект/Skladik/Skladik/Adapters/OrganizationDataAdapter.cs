@@ -4,6 +4,7 @@ using System.Drawing;
 using MySql.Data.MySqlClient;
 
 using Skladik.Utils;
+using Skladik.Adapters.BandAdapters;
 
 namespace Skladik.Adapters
 {
@@ -19,9 +20,12 @@ namespace Skladik.Adapters
 		public Image Img { get; private set; }
 		public DateTime RegDate { get; private set; }
 
+		public bool ImgChanged { get; set; }
+
 		public OrganizationDataAdapter(MySqlConnection conn)
 		{
 			Conn = conn;
+			ImgChanged = false;
 		}
 
 		// Создание организации
@@ -46,23 +50,7 @@ namespace Skladik.Adapters
 
 			Conn.Close();
 
-			// Получение её ид
-			MySqlCommand LastIdSelect = Conn.CreateCommand();
-			LastIdSelect.CommandText = "select last_insert_id() as id";
-
-			Conn.Open();
-
-			MySqlDataReader LastIdReader = LastIdSelect.ExecuteReader();
-
-			LastIdReader.Read();
-
-			Id = LastIdReader.GetInt32("id");
-
-			LastIdReader.Close();
-
-			Conn.Close();
-
-			GetData(Id);
+			GetData(QueryUtils.GetLastInsertedId(Conn));
 
 		}
 
@@ -77,6 +65,25 @@ namespace Skladik.Adapters
 
 			Query.Parameters.Add("org_id", MySqlDbType.Int32).Value = Id;
 			Query.Parameters.Add("user_id", MySqlDbType.Int32).Value = id;
+
+			Conn.Open();
+
+			Query.ExecuteNonQuery();
+
+			Conn.Close();
+
+		}
+
+		// Отвзяка пользователя
+		public void DetachUser(int userId)
+		{
+
+			MySqlCommand Query = Conn.CreateCommand();
+			Query.CommandText =
+				"delete from organization_content where organization_id = @org_id and user_id = @user_id";
+
+			Query.Parameters.Add("org_id", MySqlDbType.Int32).Value = Id;
+			Query.Parameters.Add("user_id", MySqlDbType.Int32).Value = userId;
 
 			Conn.Open();
 
@@ -116,6 +123,7 @@ namespace Skladik.Adapters
 				Email = QueryReader.GetString("email");
 				Phone = QueryReader.GetString("phone");
 				Img = QueryUtils.GetImageFromByteArray((byte[])QueryReader["avatar"]);
+				RegDate = QueryReader.GetDateTime("reg_date");
 
 			}
 			else
@@ -140,18 +148,97 @@ namespace Skladik.Adapters
 
 		// public FilterableBandAdapter GetOutImportantOrders() { }
 
-		// public void Update(string name, string phone, Image img, string about) { }
+		// Изменение данных
+		public bool Update(string name, string phone, Image img, string about)
+		{
 
-		// public BandAdapter GetAddresses() { }
+			MySqlCommand Query = Conn.CreateCommand();
 
-		// public BandAdapter GetUsers() { }
+			// Составление запроса
+			string CommandInner = "";
 
-		// public void AddAddress(string address) { }
+			if (name != Name)
+			{
+				CommandInner += " name = @name ";
+				Query.Parameters.Add("name", MySqlDbType.VarChar).Value = name;
+			}
 
-		// public void DeleteAddress(int addressId) { }
+			if (about != About)
+			{
 
-		// public void AttachUser(string userEmail) { }
+				if (CommandInner.Length > 0)
+					CommandInner += " , ";
 
-		// public void DetachUser(int userId) { }
+				CommandInner += " about = @about ";
+				Query.Parameters.Add("about", MySqlDbType.VarChar).Value = about;
+			}
+
+			if (phone != Phone)
+			{
+
+				if (CommandInner.Length > 0)
+					CommandInner += " , ";
+
+				CommandInner += " phone = @phone ";
+				Query.Parameters.Add("phone", MySqlDbType.VarChar).Value = phone;
+			}
+
+			if (this.ImgChanged)
+			{
+
+				if (CommandInner.Length > 0)
+					CommandInner += " , ";
+
+				CommandInner += " avatar = @img ";
+				Query.Parameters.Add("img", MySqlDbType.Blob).Value = QueryUtils.GetImageByteArray(img);
+			}
+
+			// Отправка запроса
+			if (CommandInner.Length > 0)
+			{
+
+				Query.CommandText = "update organization set " + CommandInner + " where id = @id";
+				Query.Parameters.Add("id", MySqlDbType.Int32).Value = Id;
+
+				Conn.Open();
+
+				Query.ExecuteNonQuery();
+
+				Conn.Close();
+
+				this.ImgChanged = false;
+
+				return true;
+			}
+
+			return false;
+		}
+
+		// Адаптер списка работников компании
+		public BandAdapter GetUsers()
+		{
+
+			MySqlCommand SelectCommand = Conn.CreateCommand();
+			SelectCommand.CommandText =
+				"select u.id, u.name, u.email " +
+				"from organization_content oc, user u " +
+				"where " +
+					"oc.organization_id = @id and " +
+					"oc.user_id = u.id ";
+
+			SelectCommand.Parameters.Add("id", MySqlDbType.Int32).Value = Id;
+
+			MySqlCommand SelectCount = Conn.CreateCommand();
+			SelectCount.CommandText =
+				"select count(*) " +
+				"from organization_content oc " +
+				"where " +
+					"oc.organization_id = @id";
+
+			SelectCount.Parameters.Add("id", MySqlDbType.Int32).Value = Id;
+
+			return new BandAdapter(SelectCommand, SelectCount, Styles.UserListElemCount, Conn);
+
+		}
 	}
 }

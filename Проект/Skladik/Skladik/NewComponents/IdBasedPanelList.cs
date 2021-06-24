@@ -6,35 +6,49 @@ using System.Data;
 
 using Skladik.Utils;
 
-namespace Skladik.NewComponents {
-	public class PanelElement : Panel {
-		
+namespace Skladik.NewComponents
+{
+	public class PanelElement : Panel
+	{
+
 		public int ElementId { get; set; }
 
 		public Label LName { get; private set; }
 
-													// Нажатие на панель или на имя
+		// Нажатие на панель или на имя
 		public event EventHandler PanelClick;
 
-													// Панель категории
-		public PanelElement(int id, string name) {
+
+		public PanelElement()
+		{
+
 			LName = new Label();
-			LName.Dock = DockStyle.Fill;
+			//LName.Dock = DockStyle.Fill;
+			LName.AutoSize = true;
+
 			LName.Margin = new Padding(5, 3, 3, 3);
 
 			this.Click += UnionClick;
 			LName.Click += UnionClick;
 
-			// this.BackColor = SystemColors.ActiveCaptionText;
+			this.BackColor = Color.Aqua;
 
-			ElementId = id;
-			LName.Text = name;
+			this.AutoSize = true;
 
 			this.Controls.Add(LName);
 		}
 
-													// Объединение событий нажатия
-		private void UnionClick(Object s, EventArgs e) {
+		public PanelElement(int id, string name) : this()
+		{
+
+			ElementId = id;
+			LName.Text = name;
+
+		}
+
+		// Объединение событий нажатия
+		private void UnionClick(Object s, EventArgs e)
+		{
 			if (PanelClick != null)
 				PanelClick(this, new EventArgs());
 		}
@@ -42,68 +56,139 @@ namespace Skladik.NewComponents {
 
 	}
 
-	public class IdBasedPanelList : PanelList {
+	public delegate PanelElement DAddElementStrategy(PanelElement elem, DataRow row);
 
-		public PanelElement ChoosedPanel { get; set; }
+	// Класс, используемый для вывода справочников
+	public class IdBasedPanelList : PanelList
+	{
 
-		public event EventHandler PanelChoosed;
+		// Алгоритм, используемый для составления 
+		// элементов из источника
+		public DAddElementStrategy AddElementStrategy { get; set; }
 
-		public IdBasedPanelList() : base() {
-			ChoosedPanel = null;
-			Margin = new Padding(0, 0, 15, 0);
+		private DataTable dataSource;
+		public DataTable DataSource
+		{
+			get { return dataSource; }
+			set
+			{
+				dataSource = value;
+
+				if (dataSource != null && AddElementStrategy != null)
+				{
+					foreach (DataRow Row in dataSource.Rows)
+						AddAPanel(AddElementStrategy(new PanelElement(), Row));
+
+					Redraw();
+				}
+			}
 		}
 
-													// Добавление панели
-		public virtual void AddAPanel(int id, string name) {
+		// Перерисовка цветов
+		private void Redraw()
+		{
+
+			if (ChoosedPanel != null)
+				foreach (Control elem in this.Controls)
+				{
+
+					PanelElement EPanel = (PanelElement)elem;
+
+					if (EPanel.ElementId == ChoosedPanel.ElementId)
+					{
+
+						ChoosedPanel = EPanel;
+						ChoosedPanel.BackColor = Color.Yellow;
+						return;
+
+					}
+				}
+		}
+
+		// Выбранная панель
+		public PanelElement ChoosedPanel { get; set; }
+
+		// Событие происходящее при выборе новой панели
+		public event EventHandler PanelChoosed;
+
+		// Ширина всех панелей при создании
+		public int PanelsWidth { get; set; }
+
+
+		public IdBasedPanelList() : base()
+		{
+			ChoosedPanel = null;
+			PanelsWidth = Width;
+		}
+
+
+		private void PanelSetUp(PanelElement elem)
+		{
+
+			Size ElementsSize = new Size(PanelsWidth, 1000);
+
+			elem.MaximumSize = ElementsSize;
+			elem.MinimumSize = new Size(PanelsWidth, 30);
+			elem.LName.MaximumSize = ElementsSize;
+
+			elem.PanelClick += PanelClick;
+
+		}
+
+		// Добавление панели
+		public virtual void AddAPanel(int id, string name)
+		{
 
 			PanelElement Temp = new PanelElement(id, name);
 
-			Temp.Width = Width - 25;
-			
-			if (name.Length < 40)
-				Temp.Height = 30;
-			else 
-				Temp.Height = 50;
-
-			Temp.PanelClick += PanelClick;
+			PanelSetUp(Temp);
 
 			this.Controls.Add(Temp);
 
 		}
 
-													// Срабатывает при выборе панели с ид
-													// отличной от ныне выбранного
-		private void PanelClick(Object s, EventArgs e) {
-			if (PanelChoosed != null) {
+		public void AddAPanel(PanelElement elem)
+		{
 
-				PanelElement NewChoosedPanel = (PanelElement)s;
+			PanelSetUp(elem);
 
-				if (ChoosedPanel == null || ChoosedPanel.ElementId != NewChoosedPanel.ElementId) {
+			this.Controls.Add(elem);
 
-
-					if (ChoosedPanel != null)
-						ChoosedPanel.BackColor = SystemColors.Control;// Цвеи для невыбранной категории
-						; 
-
-					NewChoosedPanel.BackColor = Color.Yellow;
-
-					ChoosedPanel = NewChoosedPanel;
-
-					PanelChoosed(this, new EventArgs());
-				}
-
-			}
 		}
 
-													// Сброс выбранной панели и её цвета
-		public void Reset() {
+		// Срабатывает при выборе панели с ид
+		// отличной от ныне выбранного
+		private void PanelClick(Object s, EventArgs e)
+		{
+
+			PanelElement NewChoosedPanel = (PanelElement)s;
+
+			if (ChoosedPanel == null || ChoosedPanel.ElementId != NewChoosedPanel.ElementId)
+			{
+
+
+				if (ChoosedPanel != null)
+					ChoosedPanel.BackColor = Color.Aqua;
+
+				NewChoosedPanel.BackColor = Color.Yellow;
+
+				ChoosedPanel = NewChoosedPanel;
+				if (PanelChoosed != null)
+					PanelChoosed(this, new EventArgs());
+			}
+
+		}
+
+		// Сброс выбранной панели и её цвета
+		public void Reset()
+		{
 
 			if (ChoosedPanel != null)
-				ChoosedPanel.BackColor = Color.Yellow; // Цвет для выбранной категорий
+				ChoosedPanel.BackColor = Color.Aqua;
 
 			ChoosedPanel = null;
 		}
-	
+
 	}
 
 }

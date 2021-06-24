@@ -109,10 +109,15 @@
     </Compile>
     <Compile Include="Forms\DynAuthForm.cs" />
     <Compile Include="Forms\DynForm.cs" />
+    <Compile Include="Forms\DynOrdersForm.cs" />
+    <Compile Include="Forms\DynOrganizationForm.cs" />
     <Compile Include="Forms\DynOrgCreationForm.cs" />
     <Compile Include="Forms\DynProductForm.cs" />
     <Compile Include="Forms\DynProductsBandForm.cs" />
     <Compile Include="Forms\DynRegisterForm.cs" />
+    <Compile Include="NewComponents\BackMainHeader.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="NewComponents\BackNextButtons.cs">
       <SubType>Component</SubType>
     </Compile>

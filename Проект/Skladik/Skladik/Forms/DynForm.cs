@@ -7,6 +7,8 @@ namespace Skladik.Forms
 	public class DynForm
 	{
 
+		protected const TableLayoutPanelCellBorderStyle BorderStyle = TableLayoutPanelCellBorderStyle.Inset;
+
 		protected Form1 programForm;
 
 		protected TableLayoutPanel formContent;

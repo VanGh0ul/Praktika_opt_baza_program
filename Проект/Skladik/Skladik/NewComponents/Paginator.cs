@@ -122,7 +122,7 @@ namespace Skladik.NewComponents {
 					// Elem.BackColor = SystemColors.ActiveCaptionText; Это цвет активной страницы пагинатора
 					Elem.BackColor = Color.Aqua; // Потом поменяешь
 				else
-					Elem.BackColor = SystemColors.Control;
+					Elem.BackColor = Color.Yellow;
 			}
 		}
 

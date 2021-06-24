@@ -7,13 +7,12 @@ using System.Data;
 using Skladik.Utils;
 using Skladik.NewComponents;
 using Skladik.Adapters.BandAdapters;
+using Skladik.Adapters;
 
 namespace Skladik.Forms
 {
 	public class DynProductsBandForm : DynForm
 	{
-
-		const TableLayoutPanelCellBorderStyle BorderStyle = TableLayoutPanelCellBorderStyle.Inset;
 
 		#region Объяление
 		// Категории
@@ -71,9 +70,9 @@ namespace Skladik.Forms
 		{
 			programForm.Controls.Clear();
 			Size FormSize = new Size(1350, 600);
+			programForm.Location = Styles.CentralizeFormByAnotherOne(FormSize, programForm.Location, programForm.Size);
 			programForm.MinimumSize = FormSize;
 			programForm.MaximumSize = new Size(1500, 800); ;
-			programForm.Location = new Point(10, 100);
 			programForm.Size = FormSize;
 			programForm.Text = "Просмотр товаров";
 			programForm.History.Clear();
@@ -105,7 +104,7 @@ namespace Skladik.Forms
 
 				// Переходы админской панели
 				// Переход на личный кабинет пользователя
-				UserList.UserSelected += UserChoosed;
+				UserList.UserClick += UserChoosed;
 
 				// Переход на личный кабинет организации
 				OrgList.OrgSelected += OrgChoosed;
@@ -138,7 +137,7 @@ namespace Skladik.Forms
 
 				// Формы заказов
 				BOutgoingOrders.Click += OutgoingOrderButtonClick;
-
+				BIncomingOrders.Click += IncomingOrderButtonClick;
 
 				// Вывод непривязанного пользователя
 			}
@@ -149,6 +148,7 @@ namespace Skladik.Forms
 			FillCategories();
 
 			Categories.PanelChoosed += CategoryChanged;
+			
 			BCancel.Click += CancelCategoryFilter;
 
 
@@ -157,6 +157,7 @@ namespace Skladik.Forms
 			// Передача алгоритма обработки данных из источника
 			Band.ElementCreationStrategy += AddProductStrategy;
 
+			
 			// Настройка пагинатора товаров 
 			PageSelector.PageCount = PbAdapter.GetPageCount();
 
@@ -348,7 +349,8 @@ namespace Skladik.Forms
 			Result.Dock = DockStyle.Fill;
 			Result.Margin = new Padding(0, 0, 0, 0);
 
-			Result.CellBorderStyle = BorderStyle;
+			//Result.CellBorderStyle = BorderStyle;
+		
 
 			#region Свойства элементов
 			// Заголовок	
@@ -361,18 +363,13 @@ namespace Skladik.Forms
 			LTitle.Font = new Font("Helvetica", 20);
 			LTitle.Margin = new Padding(5, 5, 5, 5);
 			LTitle.Location = new Point(5, 5);
-
+			
 			TitlePanel.Controls.Add(LTitle);
 
 			// Список категорий
 			Categories = new IdBasedPanelList();
 			Categories.Font = Styles.TextFont;
-			/*
-													// Добавление категорий
-			Categories.AddAPanel(1, "Мясо");
-			Categories.AddAPanel(2, "Овощи");
-			Categories.AddAPanel(1, "Мясо");
-			*/
+			
 			// Кнопка отмены
 			BCancel = new Button();
 
@@ -844,33 +841,33 @@ namespace Skladik.Forms
 
 			#region Кнопки заказов
 			BOutgoingOrders = new Button();
-			//BIncomingOrders = new Button();
+			BIncomingOrders = new Button();
 
 			BOutgoingOrders.Text = "Исхоящие заказы";
-			//BIncomingOrders.Text = "Входящие заказы";
+			BIncomingOrders.Text = "Входящие заказы";
 
 			BOutgoingOrders.Dock = DockStyle.Fill;
-			//BIncomingOrders.Dock = DockStyle.Fill;
+			BIncomingOrders.Dock = DockStyle.Fill;
 
 			Orders.Controls.Add(BOutgoingOrders, 0, 0);
-			//Orders.Controls.Add(BIncomingOrders, 0, 1);
+			Orders.Controls.Add(BIncomingOrders, 0, 1);
 			#endregion
 
 			#region Количество важных заказов
-			//ImportantIncoming = new Label();
+			ImportantIncoming = new Label();
 			ImportantOutgoing = new Label();
 
-			//ImportantIncoming.Text = "0";
+			ImportantIncoming.Text = "0";
 			ImportantOutgoing.Text = "0";
 
-			//Styles.TextStyle(ImportantIncoming);
+			Styles.TextStyle(ImportantIncoming);
 			Styles.TextStyle(ImportantOutgoing);
 
-			//ImportantIncoming.Anchor = AnchorStyles.None;
+			ImportantIncoming.Anchor = AnchorStyles.None;
 			ImportantOutgoing.Anchor = AnchorStyles.None;
 
 			Orders.Controls.Add(ImportantOutgoing, 1, 0);
-			//Orders.Controls.Add(ImportantIncoming, 1, 1);
+			Orders.Controls.Add(ImportantIncoming, 1, 1);
 
 			#endregion
 
@@ -1029,12 +1026,8 @@ namespace Skladik.Forms
 			elem.LPrice.Text = row["price"].ToString() + " руб. ~ 1 " + elem.MeasureUnit;
 			elem.LCount.Text = "В наличии: " + row["quant"].ToString() + " " + elem.MeasureUnit;
 			elem.LAddDate.Text = ((DateTime)row["added_on"]).ToShortDateString();
-
-
 			return elem;
 		}
-
-
 
 		// Настройка адаптера для ленты
 		private void PrepareBandAdapter()
@@ -1042,13 +1035,10 @@ namespace Skladik.Forms
 
 			MySqlCommand SelectQuery = programForm.Conn.CreateCommand();
 			SelectQuery.CommandText =
-				"select p.id, b.quantity as quant, p.name as prod_name, p.img, p.added_on, p.price, m.name as m_unit " +
-				"from product p, measure_unit m, balance b " +
-				"where p.measure_unit_id = m.id " +
-				"and p.id = b.product_id ";
-
-			// ты забыл про связь с организацией у меня нет seller id, а точно, ты же продаешь, Хм
-
+			"select p.id, b.quantity as quant, p.name as prod_name, p.img, p.added_on, p.price, m.name as m_unit " +
+			"from product p, measure_unit m, balance b " +
+			"where p.measure_unit_id = m.id " +
+			"and p.id = b.product_id ";
 			MySqlCommand SelectCount = programForm.Conn.CreateCommand();
 			//SelectCount.CommandText = "select count(*) from product";
 
@@ -1065,7 +1055,7 @@ namespace Skladik.Forms
 		}
 
 		// Обновление списка товаров
-		private void RefreshBand(int page)
+		public void RefreshBand(int page)
 		{
 			Band.Controls.Clear();
 
@@ -1086,7 +1076,8 @@ namespace Skladik.Forms
 		// Выход из системы
 		private void ExitButtonClick(Object s, EventArgs e)
 		{
-			MessageBox.Show("Выход из системы");
+			//programForm.User = new UserDataAdapter(programForm.Conn);
+			new DynAuthForm().Generate(programForm);
 		}
 
 		// Переход на личный кабинет пользователя
@@ -1098,7 +1089,8 @@ namespace Skladik.Forms
 		// Переход на личный кабинет организации
 		private void OrgAccountClicked(Object s, EventArgs e)
 		{
-			MessageBox.Show("Переход на личный кабинет организации");
+			new DynOrganizationForm().Generate(programForm, programForm.User.Organization.Id);
+			programForm.History.Push(this);
 		}
 
 		// Переход на форму просмотра товара
@@ -1123,7 +1115,11 @@ namespace Skladik.Forms
 		private void OrgChoosed(Object s, EventArgs e)
 		{
 			OrgPanel ChoosedOrg = (OrgPanel)s;
-			MessageBox.Show("Переход на форму личного кабинета организации с id - имя = " + ChoosedOrg.OrgId.ToString() + " - " + ChoosedOrg.LName.Text);
+
+			new DynOrganizationForm().Generate(programForm, ChoosedOrg.OrgId);
+			programForm.History.Push(this);
+
+			// MessageBox.Show("Переход на форму личного кабинета организации с id - имя = " + ChoosedOrg.OrgId.ToString() + " - " + ChoosedOrg.LName.Text);
 		}
 
 		// Переход на форму добавления товара
@@ -1158,7 +1154,7 @@ namespace Skladik.Forms
 		{
 
 			string CommandText =
-				"p.name like @search";
+				"p.name like @search ";
 
 			query.Parameters.Add("search", MySqlDbType.VarChar).Value = "%" + filterString + "%";
 

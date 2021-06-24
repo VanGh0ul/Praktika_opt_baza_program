@@ -93,7 +93,7 @@ namespace Skladik.NewComponents {
 			
 			org.OrgClick += OrgClicked;
 
-			org.BackColor = SystemColors.ActiveCaptionText;
+			org.BackColor = Color.Aqua;
 			org.Width = Width - 40;
 
 			if (org.LName.Text.Length > 40)
