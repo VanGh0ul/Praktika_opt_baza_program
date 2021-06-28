@@ -21,13 +21,14 @@ namespace Skladik.NewComponents {
 				pageCount = value;
 
 				ChoosedPage = 1;
+				labelOffset = 0;
 
 				Redraw();
 				LightSelected();
 			} 
 		}
 
-		private int labelOffset = 1;
+		private int labelOffset = 0;
 
 
 		public event EventHandler PageChanged;
@@ -56,7 +57,7 @@ namespace Skladik.NewComponents {
 
 			LabelCount = labelCount;
 
-			PageCount = pageCount;
+			this.pageCount = pageCount;
 
 			CreateLabels();
 
@@ -78,34 +79,41 @@ namespace Skladik.NewComponents {
 				//NewLabel.Cursor = Cursors.Hand;
 
 				labels.Add(NewLabel);
+				this.Controls.Add(NewLabel);
 			}
 
 			Redraw();
-
+			/*
 			foreach (Label Elem in labels)
-			this.Controls.Add(Elem);
-
+				this.Controls.Add(Elem);
+			*/
 			LightSelected();
 		}
 
 													// Перерисовка пагинатора
 		public void Redraw() {
 
-			if (labelOffset > 2)
+			if (labelOffset > 1)
 				labels[0].Text = "<";
 			else 
 				labels[0].Text = "1";
 
-			if (labelOffset + LabelCount < PageCount)
+			if (labelOffset + LabelCount < pageCount)
 				labels[LabelCount - 1].Text = ">";
+
+			else if (labelOffset + LabelCount == pageCount)
+				labels[LabelCount - 1].Text = pageCount.ToString();
+
 			else
 				labels[LabelCount - 1].Text = "";
 
-			for (int i = 1; i < LabelCount - 1; i++) { 
+			for (int i = 1; i < LabelCount - 1; i++) {  
 				string Temp;
 
-				if (labelOffset + i - 1 < PageCount)
-					Temp = (labelOffset + i).ToString();
+				int NewNum = labelOffset + i + 1;
+
+				if (NewNum <= PageCount)
+					Temp = NewNum.ToString();
 				else
 					Temp = "";
 				
@@ -119,10 +127,9 @@ namespace Skladik.NewComponents {
 		private void LightSelected() {
 			foreach (Label Elem in labels) {
 				if (Elem.Text == ChoosedPage.ToString())
-					// Elem.BackColor = SystemColors.ActiveCaptionText; Это цвет активной страницы пагинатора
-					Elem.BackColor = Color.Aqua; // Потом поменяешь
+					Elem.BackColor = Color.Aqua;
 				else
-					Elem.BackColor = Color.Yellow;
+					Elem.BackColor = SystemColors.Control;
 			}
 		}
 
@@ -141,6 +148,7 @@ namespace Skladik.NewComponents {
 			} else if (ChoosedValue == "<") {
  				labelOffset -= LabelCount - 2;
 				Redraw();
+
 			} else if (ChoosedValue == ">") {
 				labelOffset += LabelCount - 2;
 				Redraw();

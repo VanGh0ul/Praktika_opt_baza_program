@@ -9,85 +9,80 @@ using Skladik.NewComponents;
 using Skladik.Adapters;
 using Skladik.Adapters.BandAdapters;
 
-namespace Skladik.Forms
-{
-	class DynOrganizationForm : DynForm
-	{
+namespace Skladik.Forms {
+	class DynOrganizationForm : DynForm {
 
 		#region Объявления
-		// Адаптер организации
+													// Адаптер организации
 		private OrganizationDataAdapter Org;
+		private BandAdapter AddressAdapter;
 		private BandAdapter UsersAdapter;
 
-		// Кнопки перехода
+													// Кнопки перехода
 		public BackMainHeader Header { get; private set; }
 
-		// Картинка организации
+													// Картинка организации
 		public PictureBox PbOrgImage { get; private set; }
 
-		// Для чтения
+													// Для чтения
 		public Label LName { get; private set; }
 		public Label LEmail { get; private set; }
 		public Label LPhone { get; private set; }
 		public Label LRegDate { get; private set; }
 		public RichTextBox RtbAbout { get; private set; }
 
-		// Для изменения
+													// Для изменения
 		public TextBox TbName { get; private set; }
 		public TextBox TbPhone { get; private set; }
 		public OpenImageString OiString { get; private set; }
 		public Button BSave { get; private set; }
 		public Button BCancel { get; private set; }
 
-		// Управление справочником адресов
+													// Управление справочником адресов
 		public Paginator PagAdrList { get; private set; }
 		public IdBasedPanelList IdPlAdrList { get; private set; }
 		public Button BDeleteAddress { get; private set; }
 		public TextBox TbAddress { get; private set; }
 		public Button BAddAddress { get; private set; }
 
-		// Переход на списки заказов
+													// Переход на списки заказов
 		public Button BIncOrders { get; private set; }
 		public Button BOutOrders { get; private set; }
-
-		// Просмотр товаров организации
+		
+													// Просмотр товаров организации
 		public Button BProducts { get; private set; }
 
-		// Управление привязкой сотрудников организации
+													// Управление привязкой сотрудников организации
 		public Paginator PagUserList { get; private set; }
 		public UserIdBasedPanelList UserList { get; private set; }
 		public Button BDetach { get; private set; }
 		public TextBox TbEmailAttach { get; private set; }
 		public Button BAttach { get; private set; }
+		
+		#endregion	
 
-		#endregion
-
-		// Настройка формы
-		protected override void SetUpMainForm()
-		{
+													// Настройка формы
+		protected override void SetUpMainForm() {
 			programForm.Controls.Clear();
 			Size FormSize = new Size(1000, 600);
 			programForm.Location = Styles.CentralizeFormByAnotherOne(FormSize, programForm.Location, programForm.Size);
 			programForm.MinimumSize = FormSize;
-			programForm.MaximumSize = new Size(1500, 800); ;
+			programForm.MaximumSize = new Size(1500, 800);;
 			programForm.Size = FormSize;
 			programForm.Text = "Личный кабинет организации";
 		}
 
-		public void Generate(Form1 aForm, int organizationId)
-		{
+		public void Generate(Form1 aForm, int organizationId) {
 
 			base.Generate(aForm);
 
-			// Если пользователь администратор
-			if (programForm.User.Role == "admin")
-			{
+													// Если пользователь администратор
+			if (programForm.User.Role == "admin") {
 
 				Org = new OrganizationDataAdapter(programForm.Conn);
 
-				// Если не удалось считывать данные
-				if (!Org.GetData(organizationId))
-				{
+													// Если не удалось считывать данные
+				if (!Org.GetData(organizationId)) {
 					MessageBox.Show("Произошла ошибка при открытии личного кабинета организации");
 					programForm.History.Pop().RegenerateOldForm();
 				}
@@ -95,31 +90,26 @@ namespace Skladik.Forms
 				formContent = CreateEditableForm();
 				EditableFormSetUp();
 				FillEditableData();
-
-				// Если пользователь не привязан или 
-				// открывает личный каб. не своей организации
-			}
-			else if (programForm.User.Organization == null || organizationId != programForm.User.Organization.Id)
-			{
+			
+													// Если пользователь не привязан или 
+													// открывает личный каб. не своей организации
+			} else if (programForm.User.Organization == null || organizationId != programForm.User.Organization.Id) {
 
 				Org = new OrganizationDataAdapter(programForm.Conn);
 
-				// Если не удалось считывать данные
-				if (!Org.GetData(organizationId))
-				{
+													// Если не удалось считывать данные
+				if (!Org.GetData(organizationId)) {
 					MessageBox.Show("Произошла ошибка при открытии личного кабинета организации");
 					programForm.History.Pop().RegenerateOldForm();
 				}
 
 				formContent = CreateReadOnlyForm();
 				EventSetUp();
-				FillReadOnlyData();
+				FillReadOnlyData();	
 
-				// Если привязанный пользователь открывает 
-				// ЛК своей организации
-			}
-			else
-			{
+													// Если привязанный пользователь открывает 
+													// ЛК своей организации
+			} else {
 
 				Org = programForm.User.Organization;
 
@@ -133,12 +123,12 @@ namespace Skladik.Forms
 
 		}
 
-		#region Рамки
-		// Создание панели, что можно скроллить
-		private TableLayoutPanel CreateScrollableView(TableLayoutPanel mainFrame)
-		{
 
-			// formContent типа TableLayoutPanel
+		#region Рамки
+													// Создание панели, что можно скроллить
+		private TableLayoutPanel CreateScrollableView(TableLayoutPanel mainFrame) {
+				
+													// formContent типа TableLayoutPanel
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, BorderStyle);
 
@@ -151,8 +141,8 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-			// Для расширения площади формы
+			
+													// Для расширения площади формы
 			Panel Content = new Panel();
 			Content.Anchor = AnchorStyles.Left | AnchorStyles.Right;
 			Content.Size = new Size(Result.Width, Styles.OrganizationFormScrollPanelHeight);
@@ -162,7 +152,7 @@ namespace Skladik.Forms
 			Content.AutoScroll = true;
 			Content.AutoSize = false;
 
-
+			
 			Content.Controls.Add(mainFrame);
 
 			Result.Controls.Add(Content, 0, 0);
@@ -171,11 +161,10 @@ namespace Skladik.Forms
 
 		}
 
-		// Создание основной рамки формы
-		private TableLayoutPanel CreateMainFrame()
-		{
+													// Создание основной рамки формы
+		private TableLayoutPanel CreateMainFrame() {
 
-			// Сама рамка, что будет содержать элементы
+													// Сама рамка, что будет содержать элементы
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, BorderStyle);
 
@@ -186,35 +175,34 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
-
-			// Кнопки перехода
+													
+													// Кнопки перехода
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Верхняя часть
+													// Верхняя часть
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 0.4f * programForm.Height));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Нижняя часть
+													// Нижняя часть
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
 			return Result;
 
 		}
-
-		// Создание рамки для списка
-		private TableLayoutPanel CreateListFrame()
-		{
-
+		
+													// Создание рамки для списка
+		private TableLayoutPanel CreateListFrame() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
 
@@ -227,28 +215,28 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Пагинатор
+													// Пагинатор
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Список
+													// Список
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 70));
 
-			// Кнопка
+													// Кнопка
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Поле и кнопка
+													// Поле и кнопка
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
 
 			#endregion
@@ -257,14 +245,14 @@ namespace Skladik.Forms
 
 		}
 
+		#endregion 
 
 		#region Части формы
 
 		#region Верхняя часть формы
-		// Составление верхней части формы
-		private TableLayoutPanel CreateTopPartContent(TableLayoutPanel orgInfoPanel)
-		{
-
+													// Составление верхней части формы
+		private TableLayoutPanel CreateTopPartContent(TableLayoutPanel orgInfoPanel) {
+			
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, BorderStyle);
 
@@ -277,22 +265,21 @@ namespace Skladik.Forms
 
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Картинка 
+													// Картинка 
 			PbOrgImage = new PictureBox();
 			Styles.ImgStyle(PbOrgImage);
 
-			// Добавление содержимого верхней части
+													// Добавление содержимого верхней части
 			Result.Controls.Add(PbOrgImage, 0, 0);
 			Result.Controls.Add(orgInfoPanel, 2, 0);
-
+			
 			return Result;
 
 		}
-
-		// Информация об организации только для чтения
-		private TableLayoutPanel ReadOnlyOrgInfo()
-		{
-
+		
+													// Информация об организации только для чтения
+		private TableLayoutPanel ReadOnlyOrgInfo() { 
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, BorderStyle);
 
@@ -304,18 +291,18 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
-
-			// Название
+														
+													// Название
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-			// Пустой промежуток
+													// Пустой промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
-			// Эл адрес
+													// Эл адрес
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-			// Телефон
+													// Телефон
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-			// Дата регистрации
+													// Дата регистрации
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-			// Пустой промежуток
+													// Пустой промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
 			#endregion
@@ -340,16 +327,15 @@ namespace Skladik.Forms
 			Result.Controls.Add(LPhone, 1, 3);
 			Result.Controls.Add(LRegDate, 1, 4);
 
-			#endregion
+			#endregion 
 
 			return Result;
 
 		}
-
-		// Информация об организации, редактируемая
-		private TableLayoutPanel EditableOrgInfo()
-		{
-
+			
+													// Информация об организации, редактируемая
+		private TableLayoutPanel EditableOrgInfo() { 
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, BorderStyle);
 
@@ -361,35 +347,35 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
-
-			// Название
+														
+													// Название
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-			// Пустой промежуток
+													// Пустой промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
-			// Эл адрес
+													// Эл адрес
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-			// Телефон
+													// Телефон
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
-			// Дата регистрации
+													// Дата регистрации
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-			// Изменить изображение
+													// Изменить изображение
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-			// Пустой промежуток
+													// Пустой промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-			// Кнопки
+													// Кнопки
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 35));
-			// Пустой промежуток
+													// Пустой промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
 			#endregion
 
 			#region Компоненты
-
-			// Название
+			
+													// Название
 			TbName = new TextBox();
 			Styles.TextBoxStyle(TbName);
 
-			// Эл адрес
+													// Эл адрес
 			LEmail = new Label();
 			Styles.TextStyle(LEmail);
 
@@ -401,11 +387,11 @@ namespace Skladik.Forms
 			PhoneFrame.ColumnCount = 3;
 			PhoneFrame.RowCount = 1;
 
-			// Текст
+													// Текст
 			PhoneFrame.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-			// Поле
+													// Поле
 			PhoneFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200));
-			// Пустой промежуток
+													// Пустой промежуток
 			PhoneFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
 			PhoneFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -424,11 +410,11 @@ namespace Skladik.Forms
 
 			#endregion
 
-			// Дата регистрации
+													// Дата регистрации
 			LRegDate = new Label();
 			Styles.TextStyle(LRegDate);
 
-			// Выбор изображения
+													// Выбор изображения
 			OiString = new OpenImageString();
 			Styles.TextStyle(OiString.LComment);
 			OiString.LComment.Margin = new Padding(2, 0, 0, 0);
@@ -443,11 +429,11 @@ namespace Skladik.Forms
 			ButtonsFrame.ColumnCount = 3;
 			ButtonsFrame.RowCount = 1;
 
-			// Текст
+													// Текст
 			ButtonsFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-			// Поле
+													// Поле
 			ButtonsFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
-			// Пустой промежуток
+													// Пустой промежуток
 			ButtonsFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
 			ButtonsFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -479,15 +465,14 @@ namespace Skladik.Forms
 			return Result;
 
 		}
-
+		
 		#endregion
 
 		#region Нижняя часть формы
-
-		// Составление нижней части формы
-		private TableLayoutPanel CreateBottomPartContent()
-		{
-
+		
+													// Составление нижней части формы
+		private TableLayoutPanel CreateBottomPartContent() { 
+			
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, BorderStyle);
 
@@ -496,16 +481,16 @@ namespace Skladik.Forms
 			Result.ColumnCount = 3;
 			Result.RowCount = 1;
 
-			// Левая часть
+													// Левая часть
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-			// Промежуток
+													// Промежуток
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
-			// Правая часть
+													// Правая часть
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			#endregion
+			#endregion 
 
 			#region Левая часть
 
@@ -519,18 +504,18 @@ namespace Skladik.Forms
 
 			LeftSide.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Описание
+													// Описание
 			LeftSide.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
-			// Промежуток
+													// Промежуток
 			LeftSide.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
-			// Адреса
+													// Адреса
 			LeftSide.RowStyles.Add(new RowStyle(SizeType.Percent, 70));
 
 			#endregion
 
 			#region Компоненты
 
-			// Описание
+													// Описание
 			RtbAbout = new RichTextBox();
 			Styles.RichTextBoxStyle(RtbAbout);
 
@@ -553,19 +538,19 @@ namespace Skladik.Forms
 
 			RightSide.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Переходы к заказам
+													// Переходы к заказам
 			RightSide.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
 
-			// Промежуток
+													// Промежуток
 			RightSide.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Товары компании
+													// Товары компании
 			RightSide.RowStyles.Add(new RowStyle(SizeType.Percent, 15));
 
-			// Промежуток
+													// Промежуток
 			RightSide.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Сотрудникни
+													// Сотрудникни
 			RightSide.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
 
 			#endregion
@@ -587,26 +572,25 @@ namespace Skladik.Forms
 
 		}
 
-
-		// Часть формы, что касается адресов
-		private TableLayoutPanel CreateAddressListFrame()
-		{
-
+		
+													// Часть формы, что касается адресов
+		private TableLayoutPanel CreateAddressListFrame() { 
+			
 			TableLayoutPanel Result = CreateListFrame();
 
 			#region Компоненты
 
-			// Текст
+													// Текст
 			Label LAdrListText = new Label();
 			Styles.TextStyle(LAdrListText, 12);
 			LAdrListText.Text = "Список адресов организации";
 
-			// Пагинатор
+													// Пагинатор
 			PagAdrList = new Paginator(Styles.PaginatorLabelCount);
 			Styles.PaginatorStyle(PagAdrList);
 			PagAdrList.Anchor = AnchorStyles.Right;
 
-			// Список
+													// Список
 			IdPlAdrList = new IdBasedPanelList();
 			IdPlAdrList.Font = Styles.TextFont;
 			IdPlAdrList.PanelsWidth = IdPlAdrList.Width * 2;
@@ -618,30 +602,30 @@ namespace Skladik.Forms
 
 			DeleteButtonFrame.ColumnCount = 2;
 			DeleteButtonFrame.RowCount = 1;
-
-			// Промежуток
+														
+													// Промежуток
 			DeleteButtonFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Кнопка
+													// Кнопка
 			DeleteButtonFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
 			DeleteButtonFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
 			BDeleteAddress = new Button();
 			Styles.ButtonStyle(BDeleteAddress);
-			BDeleteAddress.Font = new Font("Helvetica", 9);
+			BDeleteAddress.Font = new Font("Comic Sans MS", 9);
 			BDeleteAddress.Text = "Удалить адрес";
 
 			DeleteButtonFrame.Controls.Add(BDeleteAddress, 1, 0);
 
 			#endregion
 
-			// Текст
+													// Текст
 			Label LAddAddressText = new Label();
 			Styles.TextStyle(LAddAddressText, 12);
 			LAddAddressText.Margin = new Padding(0, 0, 0, 5);
 			LAddAddressText.Text = "Добавить адрес доставки: ";
-
+				
 			#region Поле и кнопка добавления адреса
 
 			TableLayoutPanel AddAddressFrame = new TableLayoutPanel();
@@ -650,22 +634,22 @@ namespace Skladik.Forms
 			AddAddressFrame.ColumnCount = 3;
 			AddAddressFrame.RowCount = 1;
 
-			// Поле ввода
+													// Поле ввода
 			AddAddressFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250));
 
-			// Кнопка
+													// Кнопка
 			AddAddressFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-			// Промежуток
+													// Промежуток
 			AddAddressFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
 			AddAddressFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Поле ввода адреса
+													// Поле ввода адреса
 			TbAddress = new TextBox();
 			Styles.TextBoxStyle(TbAddress);
 
-			// Кнопка
+													// Кнопка
 			BAddAddress = new Button();
 			Styles.ButtonStyle(BAddAddress);
 			BAddAddress.Text = "Добавить";
@@ -683,16 +667,15 @@ namespace Skladik.Forms
 			Result.Controls.Add(LAddAddressText, 1, 5);
 			Result.Controls.Add(AddAddressFrame, 1, 6);
 
-			#endregion
+			#endregion 
 
 			return Result;
 
 		}
-
-		// Часть формы, что касается заказов
-		private TableLayoutPanel CreateOrdersFrame()
-		{
-
+	
+													// Часть формы, что касается заказов
+		private TableLayoutPanel CreateOrdersFrame() { 
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
 
@@ -706,55 +689,55 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
-
-			// Текст и кнопка
+			
+													// Текст и кнопка
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Текст и кнопка
+													// Текст и кнопка
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
 			#endregion
 
 			#region Компоненты
-			// Текст
+													// Текст
 			Label LOrderText = new Label();
 			Styles.TextStyle(LOrderText, 12);
 			LOrderText.Text = "Заказы";
 
-			// Текст
+													// Текст
 			Label LIncText = new Label();
 			Styles.TextStyle(LIncText);
 			LIncText.Anchor = AnchorStyles.Left;
 			LIncText.Text = "Ваши заказы";
 
-			// Текст
+													// Текст
 			Label LOutText = new Label();
 			Styles.TextStyle(LOutText);
-			LOutText.Anchor = AnchorStyles.Left;
-			LOutText.Text = "Входящие заказы";
+			//LOutText.Anchor = AnchorStyles.Left;
+			//LOutText.Text = "Входящие заказы";
 
-			// Кнопка перехода на
-			// форму исходящих заказов
+													// Кнопка перехода на
+													// форму исходящих заказов
 			BIncOrders = new Button();
 			Styles.ButtonStyle(BIncOrders);
-			BIncOrders.Text = "Список";
+			//BIncOrders.Text = "Список";
 
-			// Кнопка перехода на
-			// форму входящих заказов
+													// Кнопка перехода на
+													// форму входящих заказов
 			BOutOrders = new Button();
 			Styles.ButtonStyle(BOutOrders);
 			BOutOrders.Text = "Список";
@@ -763,7 +746,7 @@ namespace Skladik.Forms
 			Result.Controls.Add(LIncText, 1, 3);
 			Result.Controls.Add(LOutText, 1, 5);
 			Result.Controls.Add(BOutOrders, 2, 3);
-			Result.Controls.Add(BIncOrders, 2, 5);
+			//Result.Controls.Add(BIncOrders, 2, 5);
 
 			#endregion
 
@@ -771,10 +754,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Часть формы, что касается товаров организации
-		private TableLayoutPanel CreateProductsFrame()
-		{
-
+													// Часть формы, что касается товаров организации
+		private TableLayoutPanel CreateProductsFrame() { 
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
 
@@ -788,75 +770,59 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
-
-			// Текст и кнопка
+			
+													// Текст и кнопка
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
 			#endregion
 
 			#region Компоненты
 
-			// Текст
-			Label LProductText = new Label();
-			Styles.TextStyle(LProductText, 12);
-			LProductText.Text = "Товары";
-
-			// Текст
-			Label LYourProductsText = new Label();
-			Styles.TextStyle(LYourProductsText);
-			LYourProductsText.Anchor = AnchorStyles.Left;
-			LYourProductsText.Text = "Ваши товары";
-
-			// Кнопка перехода на
-			// форму просмотра товаров
 			BProducts = new Button();
 			Styles.ButtonStyle(BProducts);
-			BProducts.Text = "Список";
+			//BProducts.Text = "Список";
 
-			Result.Controls.Add(LProductText, 1, 1);
-			Result.Controls.Add(LYourProductsText, 1, 3);
-			Result.Controls.Add(BProducts, 2, 3);
+
 
 			#endregion
 
 			return Result;
 
 		}
-
-		// Часть формы, что касается работников организации
-		private TableLayoutPanel CreateWorkersListFrame()
-		{
-
+		
+													// Часть формы, что касается работников организации
+		private TableLayoutPanel CreateWorkersListFrame() { 
+		
 			TableLayoutPanel Result = CreateListFrame();
 
 			#region Компоненты
-			// Текст
+													// Текст
 			Label LWorkersListText = new Label();
 			Styles.TextStyle(LWorkersListText, 12);
 			LWorkersListText.Text = "Сотрудники организации";
 
-			// Пагинатор пользователей
+													// Пагинатор пользователей
 			PagUserList = new Paginator(Styles.PaginatorLabelCount);
 			Styles.PaginatorStyle(PagUserList);
 			PagUserList.Anchor = AnchorStyles.Right;
-
-			// Список
+			
+													// Список
 			UserList = new UserIdBasedPanelList();
-			UserList.Font = new Font("Helvetica", 8);
+			UserList.Font = new Font("Comic Sans MS", 8);
 			// UserList.Font = Styles.TextFont;
 			UserList.PanelsWidth = UserList.Width * 2;
-
+			
 			#region Кнопка отвязки пользователя
 
 			TableLayoutPanel DetachButtonFrame = new TableLayoutPanel();
@@ -864,30 +830,30 @@ namespace Skladik.Forms
 
 			DetachButtonFrame.ColumnCount = 2;
 			DetachButtonFrame.RowCount = 1;
-
-			// Промежуток
+														
+													// Промежуток
 			DetachButtonFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Кнопка
+													// Кнопка
 			DetachButtonFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
 			DetachButtonFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
 			BDetach = new Button();
 			Styles.ButtonStyle(BDetach);
-			BDetach.Font = new Font("Helvetica", 9);
+			BDetach.Font = new Font("Comic Sans MS", 9);
 			BDetach.Text = "Отвязать";
 
 			DetachButtonFrame.Controls.Add(BDetach, 1, 0);
 
 			#endregion
 
-			// Текст
+													// Текст
 			Label LAddEmailText = new Label();
 			Styles.TextStyle(LAddEmailText, 12);
 			LAddEmailText.Margin = new Padding(0, 0, 0, 5);
 			LAddEmailText.Text = "Электронный адрес пользователя: ";
-
+				
 			#region Поле и кнопка привязки пользователя 
 
 			TableLayoutPanel AddUserFrame = new TableLayoutPanel();
@@ -896,22 +862,22 @@ namespace Skladik.Forms
 			AddUserFrame.ColumnCount = 3;
 			AddUserFrame.RowCount = 1;
 
-			// Поле ввода
+													// Поле ввода
 			AddUserFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250));
 
-			// Кнопка
+													// Кнопка
 			AddUserFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-			// Промежуток
+													// Промежуток
 			AddUserFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
 			AddUserFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Поле ввода адреса
+													// Поле ввода адреса
 			TbEmailAttach = new TextBox();
 			Styles.TextBoxStyle(TbEmailAttach);
 
-			// Кнопка
+													// Кнопка
 			BAttach = new Button();
 			Styles.ButtonStyle(BAttach);
 			BAttach.Text = "Привязать";
@@ -929,41 +895,39 @@ namespace Skladik.Forms
 			Result.Controls.Add(LAddEmailText, 1, 5);
 			Result.Controls.Add(AddUserFrame, 1, 6);
 
-			#endregion
+			#endregion 
 
 			return Result;
 
 		}
-
+		
 		#endregion
-
+		
 		#endregion
 
 		#region Формы
 
-		// Форма - основа
-		private TableLayoutPanel CreateMainForm()
-		{
+													// Форма - основа
+		private TableLayoutPanel CreateMainForm() {
+			
+			TableLayoutPanel Result = CreateMainFrame(); 
 
-			TableLayoutPanel Result = CreateMainFrame();
-
-			// Кнопки перехода
+													// Кнопки перехода
 			Header = new BackMainHeader();
-
+			
 			Styles.ContentFramesStyle(Header, BorderStyle);
-			Header.BGoBack.Font = new Font("Helvetica", 8);
-			Header.BGoMain.Font = new Font("Helvetica", 8);
+			Header.BGoBack.Font = new Font("Comic Sans MS", 8);
+			Header.BGoMain.Font = new Font("Comic Sans MS", 8);
 
 			Result.Controls.Add(Header, 1, 1);
 
 			return Result;
 
 		}
-
-		// Создание формы только для чтения
-		private TableLayoutPanel CreateReadOnlyForm()
-		{
-
+		
+													// Создание формы только для чтения
+		private TableLayoutPanel CreateReadOnlyForm() {
+			
 			TableLayoutPanel Result = CreateMainForm();
 
 			Result.Controls.Add(CreateTopPartContent(ReadOnlyOrgInfo()), 1, 3);
@@ -978,10 +942,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Саоздание редактируемой формы
-		private TableLayoutPanel CreateEditableForm()
-		{
-
+													// Саоздание редактируемой формы
+		private TableLayoutPanel CreateEditableForm() {
+			
 			TableLayoutPanel MainFrame = CreateMainForm();
 
 			MainFrame.Controls.Add(CreateTopPartContent(EditableOrgInfo()), 1, 3);
@@ -996,10 +959,9 @@ namespace Skladik.Forms
 
 		#region Вывод данных
 
-		// Заполнение формы только для чтения
-		private void FillReadOnlyData()
-		{
-
+													// Заполнение формы только для чтения
+		private void FillReadOnlyData() {
+			
 			PbOrgImage.BackgroundImage = Org.Img;
 			LName.Text = Org.Name;
 			LEmail.Text = "Эл.адрес: " + Org.Email;
@@ -1009,10 +971,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Заполнение данных, что меняются 
-		private void OrgDataFill()
-		{
-
+													// Заполнение данных, что меняются 
+		private void OrgDataFill() {
+			
 			PbOrgImage.BackgroundImage = Org.Img;
 			TbName.Text = Org.Name;
 			LEmail.Text = "Эл.адрес: " + Org.Email;
@@ -1022,26 +983,46 @@ namespace Skladik.Forms
 
 		}
 
-		// Заполнение формы для редактирования
-		private void FillEditableData()
-		{
+													// Заполнение формы для редактирования
+		private void FillEditableData() {
 
 			OrgDataFill();
 
-			#region Пользователи
-			// Настройка вывода пользователей
-			UserList.UserAddStrategy = AddUserToListStrategy;
+			#region Адреса
+			
+													// Настройка вывода адресов
+			IdPlAdrList.AddElementStrategy = AddressAddStrategy;
+			
+													// Получение адаптера адресов
+			AddressAdapter = Org.GetAddresses();
 
-			// Получение адаптера пользователей
+													// Настройка пагинатора
+			PagAdrList.PageCount = AddressAdapter.GetPageCount();
+
+			
+			RefreshAddressList(1);
+
+													// Событие при изменении страницы пагинатора
+			PagAdrList.PageChanged += delegate(Object s, EventArgs args) {
+				RefreshAddressList(PagAdrList.ChoosedPage);
+			};
+
+			#endregion
+
+			#region Пользователи
+													// Настройка вывода пользователей
+			UserList.UserAddStrategy = AddUserToListStrategy;
+			
+													// Получение адаптера пользователей
 			UsersAdapter = Org.GetUsers();
 
-			// Настройка пагинатора пользователей
+													// Настройка пагинатора пользователей
 			PagUserList.PageCount = UsersAdapter.GetPageCount();
 
 			RefreshUserPanel(1);
 
-			// Событие при изменении страницы пагинатора
-			PagUserList.PageChanged += delegate (Object s, EventArgs args) {
+													// Событие при изменении страницы пагинатора
+			PagUserList.PageChanged += delegate(Object s, EventArgs args) {
 				RefreshUserPanel(PagUserList.ChoosedPage);
 			};
 
@@ -1049,15 +1030,36 @@ namespace Skladik.Forms
 
 		}
 
+		#region Адресы доставки
+		
+													// Алгоритм вывода адресов
+		private PanelElement AddressAddStrategy(PanelElement elem, DataRow row) {
+				
+			elem.ElementId = Convert.ToInt32(row["id"]);
+			elem.LName.Text = row["name"].ToString();
+
+			return elem;
+
+		}
+
+													// Обновление списка адресов
+		private void RefreshAddressList(int page) {
+			IdPlAdrList.Controls.Clear();
+			
+			//programForm.Conn.Open();
+
+			IdPlAdrList.DataSource = AddressAdapter.GetData(page);
+
+			//programForm.Conn.Close();
+		}
 
 		#endregion
 
 		#region Работники организации
 
-		// Алгоритм вывода пользователей
-		private UserPanel AddUserToListStrategy(UserPanel user, DataRow row)
-		{
-
+													// Алгоритм вывода пользователей
+		private UserPanel AddUserToListStrategy(UserPanel user, DataRow row) {
+			
 			user.UserId = Convert.ToInt32(row["id"]);
 			user.LName.Text = row["name"].ToString();
 			user.LEmail.Text = row["email"].ToString();
@@ -1066,49 +1068,48 @@ namespace Skladik.Forms
 
 		}
 
-		// Обновление списка пользователей
-		private void RefreshUserPanel(int page)
-		{
+													// Обновление списка пользователей
+		private void RefreshUserPanel(int page) {
 			UserList.Controls.Clear();
-
-			programForm.Conn.Open();
+			
+			//programForm.Conn.Open();
 
 			UserList.DataSource = UsersAdapter.GetData(page);
 
-			programForm.Conn.Close();
+			//programForm.Conn.Close();
 		}
 
+
+		#endregion
+
+		#endregion
 
 		#region События
 
 		#region Изменение данных
 
-		// Сохранение изменений
-		private void SaveButtonClick(Object s, EventArgs e)
-		{
-
+													// Сохранение изменений
+		private void SaveButtonClick(Object s, EventArgs e) {
+			
 			string Name = TbName.Text.Trim();
 			string Phone = TbPhone.Text.Trim();
 			string About = RtbAbout.Text.Trim();
 			Image Img = PbOrgImage.BackgroundImage;
 
-			// Проверка значений
-			if (!QueryUtils.CheckName(Name))
-			{
+													// Проверка значений
+			if (!QueryUtils.CheckName(Name)) {
 				MessageBox.Show("Название должно содержать от 4 до 50 букв");
 				return;
 			}
 
-			if (!QueryUtils.CheckPhone(Phone))
-			{
+			if (!QueryUtils.CheckPhone(Phone)) {
 				MessageBox.Show("Телефон имеет неправильный формат");
 				return;
 			}
 
-			// Изменение
-			if (Org.Update(Name, Phone, Img, About))
-			{
-
+													// Изменение
+			if (Org.Update(Name, Phone, Img, About)) {
+				
 				Org.GetData(Org.Id);
 				OrgDataFill();
 
@@ -1118,54 +1119,83 @@ namespace Skladik.Forms
 
 		}
 
-		// Отмена несохраненных изменений
-		private void CancelButtonClick(Object s, EventArgs e)
-		{
-
+													// Отмена несохраненных изменений
+		private void CancelButtonClick(Object s, EventArgs e) {
+			
 			OrgDataFill();
 
 		}
 
-		// После выбора изображения, 
-		// её перенос в компонент
-		private void AfterImageChoosed(Object s, EventArgs e)
-		{
-
-			if (QueryUtils.CheckImageWeight(OiString.FileName, 4200000))
-			{
+													// После выбора изображения, 
+													// её перенос в компонент
+		private void AfterImageChoosed(Object s, EventArgs e) {
+			
+			if (QueryUtils.CheckImageWeight(OiString.FileName, 4200000)) {
 				PbOrgImage.BackgroundImage = Image.FromFile(OiString.FileName);
-
+				
 				Org.ImgChanged = true;
-
-			}
-			else
+			
+			} else
 				MessageBox.Show("Размер изображения не должен превышать 4 МБ");
 
 		}
 
 		#endregion
 
+		#region Работа с адресами доставки
+													// Добавление адреса
+		private void AddAddressButtonClick(Object s, EventArgs e) {
+			
+			string Address = TbAddress.Text.Trim();
+
+			if (Address.Length == 0) {
+				MessageBox.Show("Вы не ввели адрес");
+				return;
+			}
+
+			Org.AddAddress(Address);
+
+			RefreshAddressList(1);
+
+			PagAdrList.PageCount = AddressAdapter.GetPageCount();
+
+			MessageBox.Show("Адрес добавлен");
+		}
+		
+													// Удаление адреса
+		private void DeleteAddressButtonClick(Object s, EventArgs e) {
+			
+			if (IdPlAdrList.ChoosedPanel != null) {
+				Org.DeleteAddress(IdPlAdrList.ChoosedPanel.ElementId);
+
+				RefreshAddressList(1);
+
+				PagAdrList.PageCount = AddressAdapter.GetPageCount();
+
+				MessageBox.Show("Адрес удален");
+			}
+
+		}
+		
 		#endregion
 
 		#region Привязка и отвязка пользователей
-		// Привязка пользователя
-		private void AttachUserButtonClick(Object s, EventArgs e)
-		{
-
+													// Привязка пользователя
+		private void AttachUserButtonClick(Object s, EventArgs e) { 
+		
 			string Email = TbEmailAttach.Text.Trim();
-			// Проверки
-			// Является ли текст эл. адресом
-			if (!QueryUtils.CheckEmail(Email))
-			{
+													// Проверки
+													// Является ли текст эл. адресом
+			if (!QueryUtils.CheckEmail(Email)) {
 				MessageBox.Show("Введенный эл. адрес имеет неправильный формат");
 				return;
 			}
 
-
+													
 			MySqlCommand Query = programForm.Conn.CreateCommand();
-			Query.CommandText =
-				"select u.id as u_id, r.name as role_name, oc.organization_id as org_id " +
-				"from " +
+			Query.CommandText = 
+				"select u.id as u_id, r.name as role_name, oc.organization_id as org_id " + 
+				"from " + 
 					"user u inner join user_role r on u.role_id = r.id " +
  					"left join organization_content oc on u.id = oc.user_id " +
 				"where u.email = @email";
@@ -1180,14 +1210,12 @@ namespace Skladik.Forms
 
 			MySqlDataReader QueryReader = Query.ExecuteReader();
 
-			try
-			{
-				// Существует ли пользователь
-				if (QueryReader.Read())
-				{
-
+			try {
+													// Существует ли пользователь
+				if (QueryReader.Read()) {
+			
 					UserId = QueryReader.GetInt32("u_id");
-
+					
 					if (QueryReader.IsDBNull(2))
 						OrgId = null;
 					else
@@ -1195,32 +1223,26 @@ namespace Skladik.Forms
 
 					UserRole = QueryReader.GetString("role_name");
 
-				}
-				else
-				{
+				} else {
 					MessageBox.Show("Пользователь не найден");
 					return;
 				}
 
-			}
-			finally
-			{
+			} finally {
 				QueryReader.Close();
 				programForm.Conn.Close();
 			}
-			// Не админ ли пользователь
-			if (UserRole == "admin")
-			{
+													// Не админ ли пользователь
+			if (UserRole == "admin") {
 				MessageBox.Show("Администраторы не могут быть привязаны к организациям");
 				return;
 			}
-			// Не привязан ли уже пользователь 
-			if (OrgId != null)
-			{
+													// Не привязан ли уже пользователь 
+			if (OrgId != null) {
 				MessageBox.Show("Данный пользователь уже привязан к организации");
 				return;
 			}
-			// Привязка
+													// Привязка
 			Org.AttachUser(UserId);
 
 			RefreshUserPanel(1);
@@ -1229,79 +1251,68 @@ namespace Skladik.Forms
 
 		}
 
-		// Отвязка пользователя
-		private void DetachUserButtonClick(Object s, EventArgs e)
-		{
-
+													// Отвязка пользователя
+		private void DetachUserButtonClick(Object s, EventArgs e) { 
+		
 			UserPanel SelectedUser = UserList.SelectedUser;
 
-			// Выбрана ли панель
-			if (SelectedUser == null)
-			{
+													// Выбрана ли панель
+			if (SelectedUser == null) {
 				MessageBox.Show("Вы не выбрали пользователя");
 				return;
 			}
 
-			// Нельзя отвязать себя
-			if (SelectedUser.UserId == programForm.User.Id)
-			{
+													// Нельзя отвязать себя
+			if (SelectedUser.UserId == programForm.User.Id) {
 				MessageBox.Show("Вы не можете отвязать самого себя");
 				return;
 			}
 
 			MySqlCommand Query = programForm.Conn.CreateCommand();
-			Query.CommandText =
+			Query.CommandText = 
 				"select user_id from organization_content where user_id = @u_id and organization_id = @org_id";
 
 			Query.Parameters.Add("u_id", MySqlDbType.Int32).Value = SelectedUser.UserId;
 			Query.Parameters.Add("org_id", MySqlDbType.Int32).Value = Org.Id;
-
+			
 			programForm.Conn.Open();
 
 			MySqlDataReader QueryReader = Query.ExecuteReader();
 
-			try
-			{
-				// Привязан ли пользователь к данной организации
-				if (!QueryReader.HasRows)
-				{
+			try {
+													// Привязан ли пользователь к данной организации
+				if (!QueryReader.HasRows) {
 					MessageBox.Show("Данный пользователь не привязан к данной организации");
 					return;
 				}
-
-			}
-			finally
-			{
+			
+			} finally {
 				QueryReader.Close();
 				programForm.Conn.Close();
 			}
-			// Количество привязанных пользователей > 1
+													// Количество привязанных пользователей > 1
 			Query = programForm.Conn.CreateCommand();
-			Query.CommandText =
+			Query.CommandText = 
 				"select count(*) from organization_content where organization_id = @id";
 
 			Query.Parameters.Add("id", MySqlDbType.Int32).Value = Org.Id;
 
 			programForm.Conn.Open();
 
-			try
-			{
+			try {
 
-				if (Convert.ToInt32(Query.ExecuteScalar()) == 1)
-				{
+				if (Convert.ToInt32(Query.ExecuteScalar()) == 1) {
 					MessageBox.Show("Организации не могут оставаться без привязанных пользователей");
 					return;
 				}
 
 
-			}
-			finally
-			{
+			} finally {
 				QueryReader.Close();
 				programForm.Conn.Close();
 			}
 
-			// Отвязка
+													// Отвязка
 			Org.DetachUser(UserList.SelectedUser.UserId);
 
 			RefreshUserPanel(1);
@@ -1312,64 +1323,63 @@ namespace Skladik.Forms
 
 		#endregion
 
-		// Общие для всех форм события					
-		private void EventSetUp()
-		{
-			// Переход назад
-			Header.BGoBack.Click += delegate (Object s, EventArgs args) {
+													// Общие для всех форм события					
+		private void EventSetUp() {
+													// Переход назад
+			Header.BGoBack.Click += delegate(Object s, EventArgs args) {
 				programForm.History.Pop().RegenerateOldForm();
 			};
 
-			// Переход на главн. форму
-			Header.BGoMain.Click += delegate (Object s, EventArgs args) {
+													// Переход на главн. форму
+			Header.BGoMain.Click += delegate(Object s, EventArgs args) { 
 				new DynProductsBandForm().Generate(programForm);
 			};
 
 		}
 
-		// События формы обновления
-		private void EditableFormSetUp()
-		{
+													// События формы обновления
+		private void EditableFormSetUp() {
 			EventSetUp();
-			// Изменение данных
-			OiString.AfterImgLoad += AfterImageChoosed;
+													// Изменение данных
+			OiString.AfterImgLoad += AfterImageChoosed;										
 			BSave.Click += SaveButtonClick;
 			BCancel.Click += CancelButtonClick;
 
-			// Работа с адресами
+													// Работа с адресами
+			BAddAddress.Click += AddAddressButtonClick;
+			BDeleteAddress.Click += DeleteAddressButtonClick;
 
-
-			// Работа с пользователями
+													// Работа с пользователями
 			BAttach.Click += AttachUserButtonClick;
 			BDetach.Click += DetachUserButtonClick;
 
-			// Переходы
+													// Переходы
 
-			// Переход в личный кабинет пользователя 
-			// из списка пользователей
-			UserList.UserDoubleClick += delegate (Object s, EventArgs e) {
+													// Переход в личный кабинет пользователя 
+													// из списка пользователей
+			UserList.UserDoubleClick += delegate(Object s, EventArgs e) {
 				UserPanel ChoosedUser = (UserPanel)s;
 				// programForm.History.Push(this);
 				// new DynUserForm().Generate(...)
 				MessageBox.Show("Переход к личному кабинету пользователя " + ChoosedUser.UserId);
 			};
 
-			// Переход к списку исходящих заказов организации
-			BOutOrders.Click += delegate (Object s, EventArgs e) {
-				// programForm.History.Push(this);
-				// new DynOrdersForm().Generate(...)
-				MessageBox.Show("Переход к списку исходящих заказов организации");
+													// Переход к списку исходящих заказов организации
+			BOutOrders.Click += delegate(Object s, EventArgs e) {
+				new DynOrdersForm().Generate(programForm, Org.Id, OrdersType.Outgoing);
+				programForm.History.Push(this);
+				// MessageBox.Show("Переход к списку исходящих заказов организации");
+			};
+			
+													// Переход к списку исходящих заказов организации
+			BIncOrders.Click += delegate(Object s, EventArgs e) {
+				new DynOrdersForm().Generate(programForm, Org.Id, OrdersType.Incoming);
+				programForm.History.Push(this);
+				// MessageBox.Show("Переход к списку входящих заказов организации");
 			};
 
-			// Переход к списку исходящих заказов организации
-			BIncOrders.Click += delegate (Object s, EventArgs e) {
-				// programForm.History.Push(this);
-				// new DynOrdersForm().Generate(...)
-				MessageBox.Show("Переход к списку входящих заказов организации");
-			};
 
-
-			BProducts.Click += delegate (Object s, EventArgs e) {
+			BProducts.Click += delegate(Object s, EventArgs e) {
 				DynProductsBandForm PBForm = new DynProductsBandForm();
 				PBForm.Generate(programForm);
 				PBForm.PbAdapter.FilterString = Org.Name;
@@ -1379,10 +1389,9 @@ namespace Skladik.Forms
 			};
 		}
 
-
+		#endregion
+		
 
 	}
-	#endregion
-}
 
-#endregion
+}

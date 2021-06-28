@@ -35,6 +35,7 @@ namespace Skladik.NewComponents {
 			WrapContents = true;
 			VerticalScroll.Enabled = true;
 			AutoScroll = true;
+
 		}
 													// Добавление элемента
 		public void AddElement(BandElement elem) {
@@ -47,5 +48,6 @@ namespace Skladik.NewComponents {
 			if (ProductChoosed != null)
 				ProductChoosed(s, e);
 		}
+	
 	}
 }

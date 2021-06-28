@@ -8,6 +8,11 @@ using MySql.Data.MySqlClient;
 
 namespace Skladik.Utils
 {
+
+	// Типы заказов
+	public enum OrdersType { Incoming, Outgoing }
+
+
 	public static class QueryUtils
 	{
 
@@ -21,7 +26,7 @@ namespace Skladik.Utils
 
 			return new MySqlConnection(
 				"Server=localhost;" +
-				"Database=skladik;" +
+				"Database=skladik2;" +
 				"port=3306;" +
 				"User Id=root;" +
 				"password=6199"
@@ -191,14 +196,25 @@ namespace Skladik.Utils
 			MySqlCommand LastIdSelect = conn.CreateCommand();
 			LastIdSelect.CommandText = "select last_insert_id() as id";
 
-			conn.Open();
+			//conn.Open();
 
 			int Id = Convert.ToInt32(LastIdSelect.ExecuteScalar());
 
-			conn.Close();
+			//conn.Close();
 
 			return Id;
 
 		}
+
+		// Пытается перевести объект в строку - представляющую дату, если не получается возвращает пустое значение
+		public static string TryGetTheDate(Object aDate)
+		{
+
+			if (aDate.ToString().Length != 0)
+				return Convert.ToDateTime(aDate).ToShortDateString();
+
+			return "";
+		}
+
 	}
 }

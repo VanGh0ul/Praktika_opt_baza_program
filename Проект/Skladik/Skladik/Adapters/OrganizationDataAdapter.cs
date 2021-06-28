@@ -48,9 +48,11 @@ namespace Skladik.Adapters
 
 			InsertCommand.ExecuteNonQuery();
 
+			int LastId = QueryUtils.GetLastInsertedId(Conn);
+
 			Conn.Close();
 
-			GetData(QueryUtils.GetLastInsertedId(Conn));
+			GetData(LastId);
 
 		}
 
@@ -136,17 +138,32 @@ namespace Skladik.Adapters
 			return Result;
 		}
 
-		// public FilterableBandAdapter GetIncomingOrders() { }
+		// Получение количества важных(отправленных на рассмотрение) входящих заказов
+		public int GetImportantOrdersCount(OrdersType type)
+		{
 
-		// public FilterableBandAdapter GetOutgoingOrders() { }
+			MySqlCommand Query = Conn.CreateCommand();
+			Query.CommandText =
+				"select count(*) " +
+				"from buy_order bo, order_status st " +
+				"where " +
+					"bo.buyer_id = @org_id and " +
+					"bo.status_id = st.id and " +
+					((type == OrdersType.Incoming) ? "st.name = 'waiting'" : "st.name = 'accepted'");
 
-		// public int GetIncImportantOrdersCount() { }
+			Query.Parameters.Add("org_id", MySqlDbType.Int32).Value = Id;
+
+			Conn.Open();
+
+			int Temp = Convert.ToInt32(Query.ExecuteScalar());
+
+			Conn.Close();
+
+			return Temp;
+
+		}
 
 		// public int GetOutImportantOrdersCount() { }
-
-		// public FilterableBandAdapter GetIncImportantOrders() { }
-
-		// public FilterableBandAdapter GetOutImportantOrders() { }
 
 		// Изменение данных
 		public bool Update(string name, string phone, Image img, string about)
@@ -214,6 +231,24 @@ namespace Skladik.Adapters
 			return false;
 		}
 
+		// Адаптер списка адресов компании
+		public BandAdapter GetAddresses()
+		{
+
+			MySqlCommand SelectCommand = Conn.CreateCommand();
+			SelectCommand.CommandText = "select * from address where organization_id = @id and not is_deleted";
+
+			SelectCommand.Parameters.Add("id", MySqlDbType.Int32).Value = Id;
+
+			MySqlCommand SelectCount = Conn.CreateCommand();
+			SelectCount.CommandText = "select count(*) from address where organization_id = @id and not is_deleted";
+
+			SelectCount.Parameters.Add("id", MySqlDbType.Int32).Value = Id;
+
+			return new BandAdapter(SelectCommand, SelectCount, Styles.AddressListElemCount, Conn);
+
+		}
+
 		// Адаптер списка работников компании
 		public BandAdapter GetUsers()
 		{
@@ -240,5 +275,45 @@ namespace Skladik.Adapters
 			return new BandAdapter(SelectCommand, SelectCount, Styles.UserListElemCount, Conn);
 
 		}
+
+		// Добавление нового адреса доставки
+		public void AddAddress(string address)
+		{
+
+			// Составление запроса
+			MySqlCommand Query = Conn.CreateCommand();
+			Query.CommandText =
+				"insert into address (organization_id, name) values (@id, @name)";
+
+			Query.Parameters.Add("id", MySqlDbType.Int32).Value = Id;
+			Query.Parameters.Add("name", MySqlDbType.VarChar).Value = address;
+
+			// Отправка запроса
+			Conn.Open();
+
+			Query.ExecuteNonQuery();
+
+			Conn.Close();
+
+		}
+
+		// Удаление адреса доставки
+		public void DeleteAddress(int addressId)
+		{
+
+			MySqlCommand Query = Conn.CreateCommand();
+			Query.CommandText =
+				"update address set is_deleted = true where id = @id";
+
+			Query.Parameters.Add("id", MySqlDbType.Int32).Value = addressId;
+
+			Conn.Open();
+
+			Query.ExecuteNonQuery();
+
+			Conn.Close();
+
+		}
+
 	}
 }

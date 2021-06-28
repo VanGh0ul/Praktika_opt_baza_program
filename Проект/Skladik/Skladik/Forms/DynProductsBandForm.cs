@@ -9,177 +9,189 @@ using Skladik.NewComponents;
 using Skladik.Adapters.BandAdapters;
 using Skladik.Adapters;
 
-namespace Skladik.Forms
-{
-	public class DynProductsBandForm : DynForm
-	{
+namespace Skladik.Forms {
+	public class DynProductsBandForm : DynForm {
 
 		#region Объяление
-		// Категории
+													// Категории
 		public IdBasedPanelList Categories { get; private set; }
 		public Button BCancel { get; private set; }
 
-		// Панель аккаунта
+													// Панель аккаунта
 		public Button BExit { get; private set; }
 		public Label LName { get; private set; }
 		public Label LOrgName { get; private set; }
 		public PictureBox PbAvatar { get; private set; }
 
-		//Заголовок ленты
+													//Заголовок ленты
 		public TextBox TbProductSearch { get; private set; }
 		public Button BProductSearch { get; private set; }
-		public Button BCancelSearch { get; private set; }
+		public Button BCancelSearch{ get; private set; }
 		public ComboBox CbAddedOn { get; private set; }
 		public ComboBox CbPrice { get; private set; }
 		public Button BAgree { get; private set; }
 		public Paginator PageSelector { get; private set; }
 
-		// Лента товаров
+													// Лента товаров
 		public ProductBand Band { get; private set; }
 		public ProductBandAdapter PbAdapter { get; private set; }
 
-		// Админская панель пользователей
+													// Админская панель пользователей
 		public Paginator UsersPaginator { get; private set; }
 		public TextBox TbUserSearch { get; private set; }
 		public Button BUserSearch { get; private set; }
 		public UserIdBasedPanelList UserList { get; private set; }
 
-		// Админская панель организаций
+													// Админская панель организаций
 		public Paginator OrgPaginator { get; private set; }
 		public TextBox TbOrgSearch { get; private set; }
 		public Button BOrgSearch { get; private set; }
 		public OrganizationIdBasedPanelList OrgList { get; private set; }
 
-		// Добавление товара
+													// Добавление товара
 		public Button BAddProduct { get; private set; }
 
-		// Переход на заказы
+													// Переход на заказы
 		public Button BOutgoingOrders { get; private set; }
 		public Button BIncomingOrders { get; private set; }
 
-		// Количество важных заказов
+													// Количество важных заказов
 		public Label ImportantIncoming { get; private set; }
 		public Label ImportantOutgoing { get; private set; }
 
-		// Адаптеры панели
+													// Адаптеры панели
 		public FilterableBandAdapter UsersAdapter { get; private set; }
 		public FilterableBandAdapter OrganizationsAdapter { get; private set; }
 		#endregion
-		// Настройка формы
-		protected override void SetUpMainForm()
-		{
+
+		protected override void ContentToUpdate() {
+			RefreshBand(PageSelector.ChoosedPage);
+
+			if (UserList != null)
+				RefreshUserPanel(UsersPaginator.ChoosedPage);
+
+			if (OrgList != null)
+				RefreshOrgPanel(OrgPaginator.ChoosedPage);
+
+
+			//if (programForm.User.Organization != null)
+			//	FillImportantOrdersCount();
+
+		}
+
+													// Настройка формы
+		protected override void SetUpMainForm() {
 			programForm.Controls.Clear();
 			Size FormSize = new Size(1350, 600);
 			programForm.Location = Styles.CentralizeFormByAnotherOne(FormSize, programForm.Location, programForm.Size);
 			programForm.MinimumSize = FormSize;
-			programForm.MaximumSize = new Size(1500, 800); ;
+			programForm.MaximumSize = new Size(1500, 800);;
 			programForm.Size = FormSize;
 			programForm.Text = "Просмотр товаров";
 			programForm.History.Clear();
 		}
 
-		// Генерация формы
-		public override void Generate(Form1 aForm)
-		{
+													// Генерация формы
+		public override void Generate(Form1 aForm) {
 
 			base.Generate(aForm);
 
-			// Определение формы
-			if (programForm.User.Role == "admin")
-			{
+													// Определение формы
+			if (programForm.User.Role == "admin") {
 
-				// Настройка адаптеров
+													// Настройка адаптеров
 				PrepareUserAdapter();
 				PrepareOrgAdapter();
-				// Вывод формы админа
+													// Вывод формы админа
 				formContent = GenerateAdminForm(QueryUtils.TrimToLength(programForm.User.Name, 26));
+				// Добавление товара
+				BAddProduct.Click += AddProductButtonClick;
+				AdminPrepareBandAdapter();
+				BIncomingOrders.Click += IncomingOrderButtonClick;
 
-				UsersPaginator.PageChanged += delegate (Object s, EventArgs args) {
+				UsersPaginator.PageChanged += delegate(Object s, EventArgs args) {
 					RefreshUserPanel(UsersPaginator.ChoosedPage);
 				};
-
-				OrgPaginator.PageChanged += delegate (Object s, EventArgs args) {
+				
+				OrgPaginator.PageChanged += delegate(Object s, EventArgs args) {
 					RefreshOrgPanel(OrgPaginator.ChoosedPage);
 				};
 
-				// Переходы админской панели
-				// Переход на личный кабинет пользователя
+													// Переходы админской панели
+													// Переход на личный кабинет пользователя
 				UserList.UserClick += UserChoosed;
 
-				// Переход на личный кабинет организации
-				OrgList.OrgSelected += OrgChoosed;
+													// Переход на личный кабинет организации
+				OrgList.OrgSelected += OrgChoosed; 
 
-				// Настройка поиска ползователей
+													// Настройка поиска ползователей
 				UsersAdapter.SearchStrategy = UserAndOrgSearchStrategy;
 				BUserSearch.Click += UserSearchButtonClick;
 
-				// Настройка поиска организаций
+													// Настройка поиска организаций
 				OrganizationsAdapter.SearchStrategy = UserAndOrgSearchStrategy;
 				BOrgSearch.Click += OrgSearchButtonClick;
 
 				// Вывод привязанного пользователя
-			}
-			else if (programForm.User.Organization != null)
-			{
+			} else if (programForm.User.Organization != null) {
 
 				formContent = GenerateAttachedUserForm(
-					QueryUtils.TrimToLength(programForm.User.Name, 19),
+					QueryUtils.TrimToLength(programForm.User.Name, 19), 
 					QueryUtils.TrimToLength(programForm.User.Organization.Name, 17),
 					programForm.User.Organization.Img
 				);
 
-				// Переход на личный кабинет организации
+				//FillImportantOrdersCount();
+
+													// Переход на личный кабинет организации
 				LOrgName.Click += OrgAccountClicked;
 				PbAvatar.Click += OrgAccountClicked;
 
-				// Добавление товара
-				BAddProduct.Click += AddProductButtonClick;
+										
 
-				// Формы заказов
+													// Формы заказов
 				BOutgoingOrders.Click += OutgoingOrderButtonClick;
-				BIncomingOrders.Click += IncomingOrderButtonClick;
 
+				PrepareBandAdapter();
 				// Вывод непривязанного пользователя
-			}
-			else
+			} else
 				formContent = GenerateDetachedUserForm(QueryUtils.TrimToLength(programForm.User.Name, 26));
-
+			
 			// Заполнение категорий 
 			FillCategories();
 
 			Categories.PanelChoosed += CategoryChanged;
-			
 			BCancel.Click += CancelCategoryFilter;
 
 
 			// Лента товаров
-			PrepareBandAdapter();
-			// Передача алгоритма обработки данных из источника
-			Band.ElementCreationStrategy += AddProductStrategy;
-
 			
-			// Настройка пагинатора товаров 
+
+			// Передача алгоритма обработки данных из источника
+			Band.ElementCreationStrategy = AddProductStrategy;
+				
+													// Настройка пагинатора товаров 
 			PageSelector.PageCount = PbAdapter.GetPageCount();
 
-			PageSelector.PageChanged += delegate (Object s, EventArgs args) {
+			PageSelector.PageChanged += delegate(Object s, EventArgs args) {
 				RefreshBand(PageSelector.ChoosedPage);
 			};
-
-			// Выгрузка данных 1 страницы
+			
+													// Выгрузка данных 1 страницы
 			RefreshBand(1);
 
-			// Элементы поиска товаров
+													// Элементы поиска товаров
 			BProductSearch.Click += SearchButtonClick;
 			BCancelSearch.Click += SearchCancelButtonClick;
-
-			// Подтверждение сортировки
+				
+													// Подтверждение сортировки
 			BAgree.Click += SortAgreeButtonClick;
 
-			// Выход из системы
+													// Выход из системы
 			BExit.Click += ExitButtonClick;
-			// Переход на личный кабинет пользователя
+													// Переход на личный кабинет пользователя
 			LName.Click += UserNameClicked;
-
+			
 			Band.ProductChoosed += BandProductChoosed;
 
 			programForm.Controls.Add(formContent);
@@ -189,9 +201,8 @@ namespace Skladik.Forms
 
 
 		#region Рамки
-		// Рамка формы пользователя
-		private TableLayoutPanel CreateUserFrame()
-		{
+													// Рамка формы пользователя
+		private TableLayoutPanel CreateUserFrame() {
 
 			TableLayoutPanel Result = new TableLayoutPanel();
 
@@ -215,10 +226,9 @@ namespace Skladik.Forms
 			return Result;
 		}
 
-		// Рамка формы администратора
-		private TableLayoutPanel CreateAdminFrame()
-		{
-
+													// Рамка формы администратора
+		private TableLayoutPanel CreateAdminFrame() {
+			
 			TableLayoutPanel Temp = CreateUserFrame();
 
 			Temp.CellBorderStyle = BorderStyle;
@@ -232,11 +242,10 @@ namespace Skladik.Forms
 			return Temp;
 
 		}
-
-		// Рамка категорий для неприкрепленных пользователей	
-		private TableLayoutPanel CreateDetachedCategoryFrame()
-		{
-
+				
+													// Рамка категорий для неприкрепленных пользователей	
+		private TableLayoutPanel CreateDetachedCategoryFrame() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			Result.CellBorderStyle = BorderStyle;
@@ -256,10 +265,9 @@ namespace Skladik.Forms
 			return Result;
 		}
 
-		// Рамка категорий для привязанного пользователя	
-		private TableLayoutPanel CreateAttachedCategoryFrame()
-		{
-
+													// Рамка категорий для привязанного пользователя	
+		private TableLayoutPanel CreateAttachedCategoryFrame() {
+			
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			Result.CellBorderStyle = BorderStyle;
@@ -284,10 +292,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Рамка для ленты
-		private TableLayoutPanel CreateBandFrame()
-		{
-
+													// Рамка для ленты
+		private TableLayoutPanel CreateBandFrame() {
+			
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			Result.CellBorderStyle = BorderStyle;
@@ -298,7 +305,7 @@ namespace Skladik.Forms
 			Result.RowCount = 2;
 
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
+			
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, Styles.ProductsPanelUpperHeight));
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
@@ -306,11 +313,10 @@ namespace Skladik.Forms
 			return Result;
 
 		}
-
-		// Рамка админской панели
-		private TableLayoutPanel CreateAdminPanelFrame()
-		{
-
+					
+													// Рамка админской панели
+		private TableLayoutPanel CreateAdminPanelFrame() {
+			
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			Result.CellBorderStyle = BorderStyle;
@@ -321,59 +327,58 @@ namespace Skladik.Forms
 			Result.RowCount = 3;
 
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+													
 
-
-			// Панель пользователей
+													// Панель пользователей
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Панель оранизаций
+													// Панель оранизаций
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
 
 			return Result;
 
 		}
 
-		#endregion
+		#endregion 
 
 
 		#region Части формы
-		// Вывод списка категорий
-		private TableLayoutPanel CreateCategoryList()
-		{
+													// Вывод списка категорий
+		private TableLayoutPanel CreateCategoryList() {
 
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			Result.Dock = DockStyle.Fill;
 			Result.Margin = new Padding(0, 0, 0, 0);
 
-			//Result.CellBorderStyle = BorderStyle;
-		
+			Result.CellBorderStyle = BorderStyle;
 
 			#region Свойства элементов
-			// Заголовок	
+													// Заголовок	
 			Panel TitlePanel = new Panel();
 			TitlePanel.AutoSize = true;
-
+			
 			Label LTitle = new Label();
 			LTitle.Text = "Категории";
 			LTitle.AutoSize = true;
-			LTitle.Font = new Font("Helvetica", 20);
+			LTitle.Font = new Font("Comic Sans MS", 20);
 			LTitle.Margin = new Padding(5, 5, 5, 5);
 			LTitle.Location = new Point(5, 5);
-			
+
 			TitlePanel.Controls.Add(LTitle);
 
-			// Список категорий
+													// Список категорий
 			Categories = new IdBasedPanelList();
 			Categories.Font = Styles.TextFont;
 			
-			// Кнопка отмены
+													// Кнопка отмены
 			BCancel = new Button();
 
 			BCancel.Text = "Отменить";
+			BCancel.BackColor = Color.Yellow;
 			BCancel.Margin = new Padding(2, 2, 15, 2);
 			BCancel.Size = new Size(80, 25);
 			BCancel.Dock = DockStyle.Right;
@@ -401,29 +406,29 @@ namespace Skladik.Forms
 			return Result;
 		}
 
-		// Панель личного кабинета 
-		// непривязанного пользователя
-		private Panel CreateDetachedAccountPanel(string name)
-		{
-
-			// Панель
+													// Панель личного кабинета 
+													// непривязанного пользователя
+		private Panel CreateDetachedAccountPanel(string name)  {
+			
+													// Панель
 			Panel Result = new Panel();
 			Result.Dock = DockStyle.Fill;
-
-			// Имя пользователя
+			
+													// Имя пользователя
 			LName = new Label();
 			LName.Text = name;
 			LName.Location = new Point(20, 20);
 			Styles.TextStyle(LName);
 
-			// Кнопка выхода
+													// Кнопка выхода
 			BExit = new Button();
 			BExit.Text = "Выйти";
 			BExit.Font = Styles.TextFont;
+			BExit.BackColor = Color.Yellow;
 			BExit.Size = new Size(80, 25);
 			BExit.Location = new Point(140, 55);
-
-			// Добавление на панель
+			
+													// Добавление на панель
 			Result.Controls.Add(LName);
 			Result.Controls.Add(BExit);
 
@@ -431,15 +436,14 @@ namespace Skladik.Forms
 
 		}
 
-		// Панель личного кабинета 
-		// привязанного пользователя
-		private Panel CreateAtachedAccountPanel(string name, string orgName, Image img)
-		{
-
+													// Панель личного кабинета 
+													// привязанного пользователя
+		private Panel CreateAtachedAccountPanel(string name, string orgName, Image img) {
+		
 			Panel Result = new Panel();
 			Result.Dock = DockStyle.Fill;
-
-			// Имя пользователя
+			
+													// Имя пользователя
 			LName = new Label();
 			LName.Text = name;
 			LName.Location = new Point(80, 25);
@@ -449,23 +453,23 @@ namespace Skladik.Forms
 			LOrgName.Text = orgName;
 			LOrgName.Location = new Point(80, 5);
 			LOrgName.AutoSize = true;
-			LOrgName.Font = new Font("Helvetica", 12);
+			LOrgName.Font = new Font("Comic Sans MS", 12);
 
-			// Кнопка выхода
+													// Кнопка выхода
 			BExit = new Button();
 			BExit.Text = "Выйти";
 			BExit.Font = Styles.TextFont;
 			BExit.Size = new Size(80, 25);
 			BExit.Location = new Point(140, 55);
-
-			// Аватар
+			
+													// Аватар
 			PbAvatar = new PictureBox();
 			PbAvatar.BackgroundImage = img;
 			PbAvatar.BackgroundImageLayout = ImageLayout.Zoom;
 			PbAvatar.Location = new Point(10, 10);
 			PbAvatar.Size = new Size(Styles.AccountPanelHeight - 30, Styles.AccountPanelHeight - 30);
 
-			// Добавление на панель
+													// Добавление на панель
 			Result.Controls.Add(LOrgName);
 			Result.Controls.Add(PbAvatar);
 			Result.Controls.Add(LName);
@@ -475,10 +479,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Заголовок ленты
-		private TableLayoutPanel CreateBandHeader()
-		{
-
+													// Заголовок ленты
+		private TableLayoutPanel CreateBandHeader() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			#region Рамка
@@ -489,28 +492,28 @@ namespace Skladik.Forms
 			Result.ColumnCount = 8;
 			Result.RowCount = 2;
 
-			// Пустой промежуток
+													// Пустой промежуток
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 2));
 
-			// Поле
+													// Поле
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
 
-			// Кнопка
+													// Кнопка
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
 
-			// Кнопка
+													// Кнопка
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80));
 
-			// Текст
+													// Текст
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-			// Комбобоксы
+													// Комбобоксы
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
 
-			// Кнопка
+													// Кнопка
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80));
 
-			// Пагинатор
+													// Пагинатор
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
 
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
@@ -519,25 +522,25 @@ namespace Skladik.Forms
 			#endregion
 
 			#region Компоненты
-			// Поле
+													// Поле
 			TbProductSearch = new TextBox();
 			Styles.TextBoxStyle(TbProductSearch);
-
-			// Кнопка
+				
+													// Кнопка
 			BProductSearch = new Button();
 			BProductSearch.Text = "Поиск";
 			BProductSearch.Font = Styles.TextFont;
 			BProductSearch.Dock = DockStyle.Fill;
 			BProductSearch.Margin = new Padding(5, 1, 5, 1);
 
-			// Кнопка
+													// Кнопка
 			BCancelSearch = new Button();
 			BCancelSearch.Text = "Отмена";
 			BCancelSearch.Font = Styles.TextFont;
 			BCancelSearch.Dock = DockStyle.Fill;
 			BCancelSearch.Margin = new Padding(5, 1, 5, 1);
 
-			// Текст
+													// Текст
 			Label LAddedOn = new Label();
 			LAddedOn.Text = "Дата доб.";
 			LAddedOn.Anchor = AnchorStyles.None;
@@ -548,7 +551,7 @@ namespace Skladik.Forms
 			LPrice.Anchor = AnchorStyles.Right;
 			Styles.TextStyle(LPrice);
 
-			// Комбобоксы
+													// Комбобоксы
 			CbAddedOn = new ComboBox();
 			CbAddedOn.Font = Styles.TextFont;
 			CbAddedOn.Items.Add("по умолчанию");
@@ -591,11 +594,10 @@ namespace Skladik.Forms
 
 		}
 
-		// Создание ленты товаров
-		private TableLayoutPanel CreateProductBand()
-		{
-
-			// Рамка для ленты
+													// Создание ленты товаров
+		private TableLayoutPanel CreateProductBand() {
+			
+													// Рамка для ленты
 			TableLayoutPanel BandFrame = CreateBandFrame();
 
 			Band = new ProductBand();
@@ -608,10 +610,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Создание админской панели пользователя
-		private TableLayoutPanel CreateAdminUserPanel()
-		{
-
+													// Создание админской панели пользователя
+		private TableLayoutPanel CreateAdminUserPanel() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			#region Рамка
@@ -623,16 +624,16 @@ namespace Skladik.Forms
 			Result.RowCount = 3;
 
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
-			// Заголовок
+													
+													// Заголовок
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, Styles.AdminPanelHeaderHeight));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Список
+													// Список
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-			#endregion
+			#endregion 
 
 			#region Заголовок
 			TableLayoutPanel Header = new TableLayoutPanel();
@@ -653,7 +654,7 @@ namespace Skladik.Forms
 
 			UsersPaginator = new Paginator(4);
 			Styles.PaginatorStyle(UsersPaginator);
-			UsersPaginator.Font = new Font("Helvetica", 8);
+			UsersPaginator.Font = new Font("Comic Sans MS", 8);
 
 			TbUserSearch = new TextBox();
 			Styles.TextBoxStyle(TbUserSearch);
@@ -668,14 +669,14 @@ namespace Skladik.Forms
 			Header.Controls.Add(BUserSearch, 1, 1);
 			#endregion
 
-			// Список пользователей
+													// Список пользователей
 			UserList = new UserIdBasedPanelList();
-			UserList.Font = new Font("Helvetica", 8);
+			UserList.Font = new Font("Comic Sans MS", 8);
 			UserList.UserAddStrategy = AddUserToListStrategy;
 
 			UsersPaginator.PageCount = UsersAdapter.GetPageCount();
 
-			// Вывод 1 страницы пользователей
+													// Вывод 1 страницы пользователей
 			RefreshUserPanel(1);
 
 			Result.Controls.Add(Header, 0, 0);
@@ -684,11 +685,10 @@ namespace Skladik.Forms
 			return Result;
 
 		}
-
-		// Создание админской панели организации
-		private TableLayoutPanel CreateAdminOrganizationPanel()
-		{
-
+													
+													// Создание админской панели организации
+		private TableLayoutPanel CreateAdminOrganizationPanel() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			#region Рамка
@@ -700,21 +700,21 @@ namespace Skladik.Forms
 			Result.RowCount = 3;
 
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
-			// Заголовок
+													
+													// Заголовок
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, Styles.AdminPanelHeaderHeight));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Список
+													// Список
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-
+			
 			#endregion
 
 			#region Заголовок
 			TableLayoutPanel Header = new TableLayoutPanel();
-
+			
 			Header.ColumnCount = 2;
 			Header.RowCount = 2;
 
@@ -731,7 +731,7 @@ namespace Skladik.Forms
 
 			OrgPaginator = new Paginator(4);
 			Styles.PaginatorStyle(OrgPaginator);
-			OrgPaginator.Font = new Font("Helvetica", 8);
+			OrgPaginator.Font = new Font("Comic Sans MS", 8);
 
 			TbOrgSearch = new TextBox();
 			Styles.TextBoxStyle(TbOrgSearch);
@@ -745,9 +745,9 @@ namespace Skladik.Forms
 			Header.Controls.Add(TbOrgSearch, 0, 1);
 			Header.Controls.Add(BOrgSearch, 1, 1);
 			#endregion
-
+			
 			OrgList = new OrganizationIdBasedPanelList();
-			OrgList.Font = Styles.TextFont;
+			OrgList.Font= Styles.TextFont;
 			OrgList.OrgAddStrategy += AddOrgToListStrategy;
 
 			OrgPaginator.PageCount = OrganizationsAdapter.GetPageCount();
@@ -761,10 +761,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Создание админской панели
-		private TableLayoutPanel CreateAdminPanel()
-		{
-
+													// Создание админской панели
+		private TableLayoutPanel CreateAdminPanel() {
+			
 			TableLayoutPanel Result = CreateAdminPanelFrame();
 
 			Result.Controls.Add(CreateAdminUserPanel(), 0, 0);
@@ -774,53 +773,65 @@ namespace Skladik.Forms
 			return Result;
 
 		}
-
+		
 
 		#endregion
 
 
 		#region Формы
-		// Генерация формы администатора
-		private TableLayoutPanel GenerateAdminForm(string name)
-		{
-			// Создать рамку для админа
+													// Генерация формы администатора
+		private TableLayoutPanel GenerateAdminForm(string name) { 
+													// Создать рамку для админа
 			TableLayoutPanel FormFrame = CreateAdminFrame();
 
-			// Создать категории неривязанного
+													// Создать категории неривязанного
 			TableLayoutPanel CategoryFrame = CreateDetachedCategoryFrame();
 
 			CategoryFrame.Controls.Add(CreateCategoryList(), 0, 0);
+
+
+			BIncomingOrders = new Button();
+			BIncomingOrders.Text = "Входящие заказы";
+			BIncomingOrders.Dock = DockStyle.Fill;
+			BIncomingOrders.Height = 50;
+			BIncomingOrders.BackColor = Color.Yellow; 
+			BIncomingOrders.Width = 100;
+			BIncomingOrders.Margin = new Padding(20, 10, 20, 10);
+			CategoryFrame.Controls.Add(BIncomingOrders, 0, 2);
+
+			BAddProduct = new Button();
+			BAddProduct.Text = "Добавить товар";
+			BAddProduct.Dock = DockStyle.Fill;
+			BAddProduct.Height = 50;
+			BAddProduct.BackColor = Color.Yellow;
+			BAddProduct.Width = 100;
+			BAddProduct.Margin = new Padding(20, 10, 20, 10);
+
+			CategoryFrame.Controls.Add(BAddProduct, 0, 2);
+
 			CategoryFrame.Controls.Add(CreateDetachedAccountPanel(name), 0, 2);
 
 			FormFrame.Controls.Add(CategoryFrame, 1, 1);
 
-			// Создать ленту
+													// Создать ленту
 			FormFrame.Controls.Add(CreateProductBand(), 3, 1);
 
-			// Создать админскую панель
+													// Создать админскую панель
 			FormFrame.Controls.Add(CreateAdminPanel(), 5, 1);
 
 			return FormFrame;
 		}
-
-		// Генерация формы привязанного пользователя
-		private TableLayoutPanel GenerateAttachedUserForm(string name, string orgName, Image img)
-		{
-			// Создать рамку для пользователя
+		
+													// Генерация формы привязанного пользователя
+		private TableLayoutPanel GenerateAttachedUserForm(string name, string orgName, Image img) { 
+													// Создать рамку для пользователя
 			TableLayoutPanel FormFrame = CreateUserFrame();
-			// Создать категориии привязанного
+													// Создать категориии привязанного
 			TableLayoutPanel CategoryFrame = CreateAttachedCategoryFrame();
-			// Категории
+													// Категории
 			CategoryFrame.Controls.Add(CreateCategoryList(), 0, 0);
 
-			// Добавить товар
-			BAddProduct = new Button();
-			BAddProduct.Text = "Добавить товар";
-			BAddProduct.Dock = DockStyle.Fill;
-			BAddProduct.Margin = new Padding(20, 0, 20, 0);
-
-			CategoryFrame.Controls.Add(BAddProduct, 0, 2);
-
+													
 			#region Таблица кнопок заказов
 			TableLayoutPanel Orders = new TableLayoutPanel();
 
@@ -828,110 +839,83 @@ namespace Skladik.Forms
 			Orders.CellBorderStyle = BorderStyle;
 			Orders.Margin = new Padding(10, 0, 10, 0);
 
-			Orders.ColumnCount = 2;
-			Orders.RowCount = 2;
+			Orders.ColumnCount = 1;
+			Orders.RowCount = 1;
 
-			Orders.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80));
-			Orders.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
-
-
-			Orders.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-			Orders.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
 			#endregion
 
 			#region Кнопки заказов
+
+
 			BOutgoingOrders = new Button();
-			BIncomingOrders = new Button();
-
-			BOutgoingOrders.Text = "Исхоящие заказы";
-			BIncomingOrders.Text = "Входящие заказы";
-
+			BOutgoingOrders.Text = "Мои заказы";
+			BOutgoingOrders.Height = 40;
+			BOutgoingOrders.BackColor = Color.Yellow;
+			BOutgoingOrders.Width = 100;
 			BOutgoingOrders.Dock = DockStyle.Fill;
-			BIncomingOrders.Dock = DockStyle.Fill;
-
-			Orders.Controls.Add(BOutgoingOrders, 0, 0);
-			Orders.Controls.Add(BIncomingOrders, 0, 1);
+			Orders.Controls.Add(BOutgoingOrders, 1, 1);
+			
 			#endregion
 
-			#region Количество важных заказов
-			ImportantIncoming = new Label();
-			ImportantOutgoing = new Label();
-
-			ImportantIncoming.Text = "0";
-			ImportantOutgoing.Text = "0";
-
-			Styles.TextStyle(ImportantIncoming);
-			Styles.TextStyle(ImportantOutgoing);
-
-			ImportantIncoming.Anchor = AnchorStyles.None;
-			ImportantOutgoing.Anchor = AnchorStyles.None;
-
-			Orders.Controls.Add(ImportantOutgoing, 1, 0);
-			Orders.Controls.Add(ImportantIncoming, 1, 1);
-
-			#endregion
-
-			CategoryFrame.Controls.Add(Orders, 0, 4);
+			CategoryFrame.Controls.Add(Orders, 2, 4);
 			CategoryFrame.Controls.Add(CreateAtachedAccountPanel(name, orgName, img), 0, 6);
 
 			FormFrame.Controls.Add(CategoryFrame, 1, 1);
 
 			// Создать ленту
 			FormFrame.Controls.Add(CreateProductBand(), 3, 1);
-
+			
 			return FormFrame;
 		}
 
-		// Генерация формы непривязанного пользователя
-		private TableLayoutPanel GenerateDetachedUserForm(string name)
-		{
-			// Создать рамку для пользователя
+													// Генерация формы непривязанного пользователя
+		private TableLayoutPanel GenerateDetachedUserForm(string name) { 
+													// Создать рамку для пользователя
 			TableLayoutPanel FormFrame = CreateUserFrame();
-			// Создать категориии непривязанного
+													// Создать категориии непривязанного
 			TableLayoutPanel CategoryFrame = CreateDetachedCategoryFrame();
-
+			PrepareBandAdapter();
 			CategoryFrame.Controls.Add(CreateCategoryList(), 0, 0);
 			CategoryFrame.Controls.Add(CreateDetachedAccountPanel(name), 0, 2);
 
 			FormFrame.Controls.Add(CategoryFrame, 1, 1);
-
+			
 			// Создать ленту
 			FormFrame.Controls.Add(CreateProductBand(), 3, 1);
 
 			return FormFrame;
 		}
-
+		
 		#endregion
 
 
 		#region Вывод данных
-		// Заполнение категорий
-		private void FillCategories()
-		{
-			// Получение данных
+													// Заполнение категорий
+		private void FillCategories() {
+													// Получение данных
 			MySqlCommand Query = programForm.Conn.CreateCommand();
 			Query.CommandText = "select * from category";
-
+			
 			programForm.Conn.Open();
 
 			MySqlDataReader QueryReader = Query.ExecuteReader();
-
-			// Выгрузка в компонент категорий
+			
+													// Выгрузка в компонент категорий
 			while (QueryReader.Read())
 				Categories.AddAPanel(QueryReader.GetInt32("id"), QueryReader.GetString("name"));
 
 			QueryReader.Close();
-
+			
 			programForm.Conn.Close();
 
 		}
 
-		#region Панель пользователей
-		// Алгоритм вывода информации на панель
-		// пользователя из источника
-		private UserPanel AddUserToListStrategy(UserPanel user, DataRow row)
-		{
 
+		#region Панель пользователей
+													// Алгоритм вывода информации на панель
+													// пользователя из источника
+		private UserPanel AddUserToListStrategy(UserPanel user, DataRow row) {
+			
 			user.UserId = Convert.ToInt32(row["id"]);
 			user.LName.Text = row["name"].ToString();
 			user.LEmail.Text = row["email"].ToString();
@@ -940,42 +924,39 @@ namespace Skladik.Forms
 
 		}
 
-		// Настройка адаптер панели пользователей
-		private void PrepareOrgAdapter()
-		{
-			// Настройка адаптера
+													// Настройка адаптер панели пользователей
+		private void PrepareOrgAdapter() {
+													// Настройка адаптера
 			MySqlCommand SelectCommand = programForm.Conn.CreateCommand();
 			SelectCommand.CommandText = "select * from user";
 
 			MySqlCommand SelectCount = programForm.Conn.CreateCommand();
 			SelectCount.CommandText = "select count(*) from user";
 
-
+			
 			UsersAdapter = new FilterableBandAdapter(SelectCommand, SelectCount, Styles.AdminPanelListsElemCount, programForm.Conn);
 
 		}
-
-		// Обновление списка пользователей
-		private void RefreshUserPanel(int page)
-		{
+		
+													// Обновление списка пользователей
+		private void RefreshUserPanel(int page) {
 			UserList.Controls.Clear();
-
-			programForm.Conn.Open();
+			
+			// programForm.Conn.Open();
 
 			UserList.DataSource = UsersAdapter.GetData(page);
 
-			programForm.Conn.Close();
+			// programForm.Conn.Close();
 		}
-
+		
 
 		#endregion
 
 		#region Панель организаций
-		// Алгоритм вывода информации на панель
-		// организации из источника
-		private OrgPanel AddOrgToListStrategy(OrgPanel org, DataRow row)
-		{
-
+													// Алгоритм вывода информации на панель
+													// организации из источника
+		private OrgPanel AddOrgToListStrategy(OrgPanel org, DataRow row) {
+		
 			org.OrgId = Convert.ToInt32(row["id"]);
 			org.LName.Text = row["name"].ToString();
 			org.PbImage.BackgroundImage = QueryUtils.GetImageFromByteArray((byte[])row["avatar"]);
@@ -984,9 +965,8 @@ namespace Skladik.Forms
 
 		}
 
-		// Настройка адаптера панели организации
-		private void PrepareUserAdapter()
-		{
+													// Настройка адаптера панели организации
+		private void PrepareUserAdapter() {
 
 			MySqlCommand SelectCommand = programForm.Conn.CreateCommand();
 			SelectCommand.CommandText = "select * from organization";
@@ -999,46 +979,71 @@ namespace Skladik.Forms
 
 		}
 
-		// Обновление списка организаций
-		private void RefreshOrgPanel(int page)
-		{
+													// Обновление списка организаций
+		private void RefreshOrgPanel(int page) {
 			OrgList.Controls.Clear();
-
-			programForm.Conn.Open();
+			
+			// programForm.Conn.Open();
 
 			OrgList.DataSource = OrganizationsAdapter.GetData(page);
 
-			programForm.Conn.Close();
+			// programForm.Conn.Close();
 		}
 
 		#endregion
 
 		#region Лента товаров	
-		// Алгоритм добавления информации в карточку
-		// товара
-		private BandElement AddProductStrategy(BandElement elem, DataRow row)
-		{
-
+													// Алгоритм добавления информации в карточку
+													// товара
+		private BandElement AddProductStrategy(BandElement elem, DataRow row) {
+			
 			elem.ProductId = Convert.ToInt32(row["id"]);
 			elem.PbImage.BackgroundImage = QueryUtils.GetImageFromByteArray((byte[])row["img"]);
 			elem.MeasureUnit = row["m_unit"].ToString();
 			elem.LName.Text = row["prod_name"].ToString();
 			elem.LPrice.Text = row["price"].ToString() + " руб. ~ 1 " + elem.MeasureUnit;
-			elem.LCount.Text = "В наличии: " + row["quant"].ToString() + " " + elem.MeasureUnit;
+			elem.LCount.Text = "В наличии: " +  row["quant"].ToString() + " " + elem.MeasureUnit;
 			elem.LAddDate.Text = ((DateTime)row["added_on"]).ToShortDateString();
+
 			return elem;
 		}
 
-		// Настройка адаптера для ленты
-		private void PrepareBandAdapter()
+													// Настройка адаптера для ленты
+		private void PrepareBandAdapter() {
+			
+			MySqlCommand SelectQuery = programForm.Conn.CreateCommand();
+			SelectQuery.CommandText =
+				"select p.id, b.quantity as quant, p.name as prod_name, p.img, p.added_on, p.price, m.name as m_unit " +
+				"from product p, measure_unit m, balance b " +
+				"where p.measure_unit_id = m.id "+
+				"and p.name <> 'Товар удален' " +
+				"and p.id = b.product_id ";
+
+			MySqlCommand SelectCount = programForm.Conn.CreateCommand();
+			//SelectCount.CommandText = "select count(*) from product";
+
+			SelectCount.CommandText =
+				"select count(*) " +
+				"from product p, organization s, measure_unit m, balance b " +
+				"where p.measure_unit_id = m.id " + 
+				"and p.id = b.product_id ";
+
+			PbAdapter = new ProductBandAdapter(SelectQuery, SelectCount, Styles.ProductPanelElemCount, programForm.Conn);
+
+			PbAdapter.SearchStrategy = BandSearchStrategy;
+
+		}
+
+		private void AdminPrepareBandAdapter()
 		{
 
 			MySqlCommand SelectQuery = programForm.Conn.CreateCommand();
 			SelectQuery.CommandText =
-			"select p.id, b.quantity as quant, p.name as prod_name, p.img, p.added_on, p.price, m.name as m_unit " +
-			"from product p, measure_unit m, balance b " +
-			"where p.measure_unit_id = m.id " +
-			"and p.id = b.product_id ";
+				"select p.id, b.quantity as quant, p.name as prod_name, p.img, p.added_on, p.price, m.name as m_unit " +
+				"from product p, measure_unit m, balance b " +
+				"where p.measure_unit_id = m.id " +
+				"and p.id = b.product_id ";
+
 			MySqlCommand SelectCount = programForm.Conn.CreateCommand();
 			//SelectCount.CommandText = "select count(*) from product";
 
@@ -1054,92 +1059,91 @@ namespace Skladik.Forms
 
 		}
 
+
+
+
+
+
 		// Обновление списка товаров
-		public void RefreshBand(int page)
-		{
+		public void RefreshBand(int page) {
 			Band.Controls.Clear();
 
-			programForm.Conn.Open();
+			// programForm.Conn.Open();
 
 			Band.DataSource = PbAdapter.GetData(page);
 
-			programForm.Conn.Close();
+			// programForm.Conn.Close();
 		}
-
+		
 		#endregion
 
 		#endregion
 
 
 		#region Переходы по формам
-
-		// Выход из системы
-		private void ExitButtonClick(Object s, EventArgs e)
-		{
-			//programForm.User = new UserDataAdapter(programForm.Conn);
+		
+													// Выход из системы
+		private void ExitButtonClick(Object s, EventArgs e) {
+			programForm.User = new UserDataAdapter(programForm.Conn);
 			new DynAuthForm().Generate(programForm);
 		}
 
-		// Переход на личный кабинет пользователя
-		private void UserNameClicked(Object s, EventArgs e)
-		{
+													// Переход на личный кабинет пользователя
+		private void UserNameClicked(Object s, EventArgs e) {
 			MessageBox.Show("Переход на личный кабинет пользователя");
 		}
 
-		// Переход на личный кабинет организации
-		private void OrgAccountClicked(Object s, EventArgs e)
-		{
+													// Переход на личный кабинет организации
+		private void OrgAccountClicked(Object s, EventArgs e) {
 			new DynOrganizationForm().Generate(programForm, programForm.User.Organization.Id);
 			programForm.History.Push(this);
 		}
 
-		// Переход на форму просмотра товара
-		private void BandProductChoosed(Object s, EventArgs e)
-		{
+													// Переход на форму просмотра товара
+		private void BandProductChoosed(Object s, EventArgs e) {
 			BandElement Product = (BandElement)s;
 			//MessageBox.Show("Переход на форму просмотра товара с id - имя = " + Product.ProductId.ToString() + " - " + Product.LName.Text);
 			new DynProductForm().Generate(programForm, Product.ProductId);
 			programForm.History.Push(this);
 		}
 
-		// Переход на форму личного кабинета
-		// выбранного в панели администратора пользователя
-		private void UserChoosed(Object s, EventArgs e)
-		{
+													// Переход на форму личного кабинета
+													// выбранного в панели администратора пользователя
+		private void UserChoosed(Object s, EventArgs e) {
 			UserPanel ChoosedUser = (UserPanel)s;
-			MessageBox.Show("Переход на форму личного кабинета пользователя с id - имя = " + ChoosedUser.UserId.ToString() + " - " + ChoosedUser.LName.Text);
+			//MessageBox.Show("Переход на форму личного кабинета пользователя с id - имя = " + ChoosedUser.UserId.ToString() + " - " + ChoosedUser.LName.Text);
 		}
 
-		// Переход на форму личного кабинета
-		// выбранного в панели администратора организации
-		private void OrgChoosed(Object s, EventArgs e)
-		{
+													// Переход на форму личного кабинета
+													// выбранного в панели администратора организации
+		private void OrgChoosed(Object s, EventArgs e) {
 			OrgPanel ChoosedOrg = (OrgPanel)s;
 
 			new DynOrganizationForm().Generate(programForm, ChoosedOrg.OrgId);
 			programForm.History.Push(this);
-
+			
 			// MessageBox.Show("Переход на форму личного кабинета организации с id - имя = " + ChoosedOrg.OrgId.ToString() + " - " + ChoosedOrg.LName.Text);
 		}
-
-		// Переход на форму добавления товара
-		private void AddProductButtonClick(Object s, EventArgs e)
-		{
+			
+													// Переход на форму добавления товара
+		private void AddProductButtonClick(Object s, EventArgs e) {
 			new DynProductForm().Generate(programForm);
 			programForm.History.Push(this);
-			//MessageBox.Show("Переход на форму добавления товара");
+			// MessageBox.Show("Переход на форму добавления товара");
 		}
 
-		// Переход на форму исходящих заказов
-		private void OutgoingOrderButtonClick(Object s, EventArgs e)
-		{
-			MessageBox.Show("Переход на форму исходящих заказов");
+													// Переход на форму исходящих заказов
+		private void OutgoingOrderButtonClick(Object s, EventArgs e) {
+			new DynOrdersForm().Generate(programForm, programForm.User.Organization.Id, OrdersType.Outgoing);
+			programForm.History.Push(this);
+			// MessageBox.Show("Переход на форму исходящих заказов");
 		}
 
-		// Переход на форму входящих заказов
-		private void IncomingOrderButtonClick(Object s, EventArgs e)
-		{
-			MessageBox.Show("Переход на форму входящих заказов");
+													// Переход на форму входящих заказов
+		private void IncomingOrderButtonClick(Object s, EventArgs e) {
+			new DynOrdersForm().Generate(programForm, programForm.User.Organization.Id, OrdersType.Incoming);
+			programForm.History.Push(this);
+			// MessageBox.Show("Переход на форму входящих заказов");
 		}
 
 		#endregion
@@ -1149,11 +1153,10 @@ namespace Skladik.Forms
 
 		#region Поиск товаров
 
-		// Алгоритм поиска товаров
-		private MySqlCommand BandSearchStrategy(MySqlCommand query, string filterString)
-		{
-
-			string CommandText =
+													// Алгоритм поиска товаров
+		private MySqlCommand BandSearchStrategy(MySqlCommand query, string filterString) {
+		
+			string CommandText = 
 				"p.name like @search ";
 
 			query.Parameters.Add("search", MySqlDbType.VarChar).Value = "%" + filterString + "%";
@@ -1164,41 +1167,37 @@ namespace Skladik.Forms
 				query.CommandText += " and (" + CommandText + ")";
 
 			return query;
-
+		
 		}
 
-		// Кнопка поиска
-		private void SearchButtonClick(Object s, EventArgs e)
-		{
-
+													// Кнопка поиска
+		private void SearchButtonClick(Object s, EventArgs e) {
+			
 			string SearchString = TbProductSearch.Text.Trim();
 
-			if (SearchString != "" && SearchString != PbAdapter.FilterString)
-			{
+			if (SearchString != "" && SearchString != PbAdapter.FilterString) {
 				PbAdapter.FilterString = SearchString;
 				PageSelector.PageCount = PbAdapter.GetPageCount();
 				RefreshBand(1);
 			}
 		}
 
-		// Кнопка отмены поиска
-		private void SearchCancelButtonClick(Object s, EventArgs e)
-		{
-
+													// Кнопка отмены поиска
+		private void SearchCancelButtonClick(Object s, EventArgs e) {
+			
 			PbAdapter.ResetFilter();
 			PageSelector.PageCount = PbAdapter.GetPageCount();
 			RefreshBand(1);
 
 		}
-
-		#endregion
+		
+		#endregion	
 
 		#region Фильтрация по категориям
-
-		// При выборе категории
-		private void CategoryChanged(Object s, EventArgs e)
-		{
-
+		
+													// При выборе категории
+		private void CategoryChanged(Object s, EventArgs e) { 
+			
 			IdBasedPanelList SenderList = (IdBasedPanelList)s;
 
 			PbAdapter.CategoryFilterId = SenderList.ChoosedPanel.ElementId;
@@ -1208,10 +1207,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Сброс категории
-		private void CancelCategoryFilter(Object s, EventArgs e)
-		{
-
+													// Сброс категории
+		private void CancelCategoryFilter(Object s, EventArgs e) {
+			
 			PbAdapter.ResetCategory();
 
 			Categories.Reset();
@@ -1225,10 +1223,9 @@ namespace Skladik.Forms
 
 		#region Сортировка ленты
 
-		private void SortAgreeButtonClick(Object s, EventArgs e)
-		{
-
-			// Определение сортировки по цене
+		private void SortAgreeButtonClick(Object s, EventArgs e) {
+			
+													// Определение сортировки по цене
 			if (CbPrice.Items[CbPrice.SelectedIndex].ToString() == "по умолчанию")
 				PbAdapter.SortByPrice = ProductsSortType.Default;
 
@@ -1238,7 +1235,7 @@ namespace Skladik.Forms
 			else
 				PbAdapter.SortByPrice = ProductsSortType.Desc;
 
-			// Определение сортировки по дате добавления
+													// Определение сортировки по дате добавления
 			if (CbAddedOn.Items[CbAddedOn.SelectedIndex].ToString() == "по умолчанию")
 				PbAdapter.SortByAddDate = ProductsSortType.Default;
 
@@ -1258,10 +1255,9 @@ namespace Skladik.Forms
 
 
 		#region Панель админа - поиск пользователей и поиск организаций
-
-		// Алгоритм поиска пользователей и организаций
-		private MySqlCommand UserAndOrgSearchStrategy(MySqlCommand query, string filterString)
-		{
+		
+													// Алгоритм поиска пользователей и организаций
+		private MySqlCommand UserAndOrgSearchStrategy(MySqlCommand query, string filterString) {
 
 			string CommandText =
 				"name like @search or " +
@@ -1279,19 +1275,17 @@ namespace Skladik.Forms
 
 		}
 
-		// Кнопка поиска панели пользователей
-		private void UserSearchButtonClick(Object s, EventArgs e)
-		{
-
+													// Кнопка поиска панели пользователей
+		private void UserSearchButtonClick(Object s, EventArgs e) {
+			
 			string SearchString = TbUserSearch.Text.Trim();
 
-			if (SearchString != UsersAdapter.FilterString)
-			{
+			if (SearchString != UsersAdapter.FilterString) {
 
-				if (SearchString != "")
+				if (SearchString != "" ) 
 					UsersAdapter.FilterString = SearchString;
 
-				else
+				else 
 					UsersAdapter.ResetFilter();
 
 				UsersPaginator.PageCount = UsersAdapter.GetPageCount();
@@ -1300,20 +1294,18 @@ namespace Skladik.Forms
 			}
 
 		}
-
-		// Кнопка поиска панели организаций
-		private void OrgSearchButtonClick(Object s, EventArgs e)
-		{
-
+		
+													// Кнопка поиска панели организаций
+		private void OrgSearchButtonClick(Object s, EventArgs e) {
+			
 			string SearchString = TbOrgSearch.Text.Trim();
 
-			if (SearchString != OrganizationsAdapter.FilterString)
-			{
+			if (SearchString != OrganizationsAdapter.FilterString) {
 
-				if (SearchString != "")
+				if (SearchString != "" ) 
 					OrganizationsAdapter.FilterString = SearchString;
 
-				else
+				else 
 					OrganizationsAdapter.ResetFilter();
 
 				OrgPaginator.PageCount = OrganizationsAdapter.GetPageCount();
@@ -1322,7 +1314,7 @@ namespace Skladik.Forms
 			}
 
 		}
-
+		
 
 		#endregion
 

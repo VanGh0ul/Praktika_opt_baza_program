@@ -18,7 +18,7 @@ namespace Skladik
 
 		public MySqlConnection Conn { get; private set; }
 
-		public UserDataAdapter User { get; private set; }
+		public UserDataAdapter User { get; set; }
 
 		public Stack<DynForm> History { get; private set; }
 
@@ -37,7 +37,7 @@ namespace Skladik
 			new DynAuthForm().Generate(this);
 
 			if (!QueryUtils.CheckConnection(Conn))
-				MessageBox.Show("Ну удалось установить соединение с БД");
+				MessageBox.Show("Не удалось установить соединение с БД");
 
 		}
 

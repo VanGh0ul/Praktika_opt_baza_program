@@ -1,6 +1,6 @@
-create database skladik;
+create database skladik2;
 
-use skladik;
+use skladik2;
 
 create table user_role (
 	id int unsigned primary key auto_increment,
@@ -9,8 +9,7 @@ create table user_role (
 );
 
 insert into user_role(name)
-values ("admin"), ("usual");
-
+values ("admin"), ("usual"), ("buyer");
 
 create table user (
 	id int unsigned primary key auto_increment,
@@ -27,16 +26,34 @@ create table user (
 	reg_date date	
 );
 
+insert into user
+(name, email, password, role_id, reg_date)
+values ("First Administrator", "admin_skladik@skladik.ru", md5("Rootofsys1"), 1, curdate());
+
 create table organization(
 	id int unsigned primary key auto_increment,
 	name varchar(50),
 	index(name),
+
 	deliver_adres varchar(50),
 	about text,
 	email varchar(50) unique,
 	phone varchar(12),
 	avatar blob(5200000),
 	reg_date date
+);
+
+create table address (
+	id int unsigned primary key auto_increment,
+	
+	organization_id int unsigned,
+	index(organization_id),
+	foreign key (organization_id) references organization(id)
+		on delete restrict
+		on update restrict,
+
+	is_deleted bool default false,
+	name varchar(50)
 );
 
 create table organization_content(
@@ -55,17 +72,27 @@ create table organization_content(
 	unique index(organization_id, user_id)
 );
 
-
 create table measure_unit(
 	id int unsigned primary key auto_increment,
 	name varchar(30)
 );
+
+insert into measure_unit(name)
+values ("шт."), ("т."), ("кг."), ("л."), ("мл.");
 
 create table category(
 	id int unsigned primary key auto_increment,
 	name varchar(30)
 );
 
+insert into category(name)
+values
+("Крупы"),
+("Корм для животных"),
+("Мясо"),
+("Овощи"),
+("Рыба"),
+("Фрукты");
 
 create table product(
 	id int unsigned primary key auto_increment,
@@ -119,12 +146,20 @@ create table operation(
 	quantity int
 );
 
-
-create table order_status (
+create table order_status(
 	id int unsigned primary key auto_increment,
-	name varchar(50)
+	name varchar(30),
+	rus_name varchar(30)
 );
 
+insert into order_status(name,rus_name )
+values 
+	("editing", "В процессе оформления"),
+	("waiting", "Отправлен на рассмотрение"),
+	("accepted", "Принят"),
+	("declined", "Отклонен"),
+	("delivered", "Доставлен"),
+	("canceled", "Отменен");	
 
 create table buy_order(
 	id int unsigned primary key auto_increment,
@@ -172,11 +207,21 @@ create table order_content(
 );
 
 
+insert into user_role(name)
+values ("admin"), ("usual"), ("buyer");
+
+
+
+insert into measure_unit(name)
+values ("шт."), ("т."), ("кг."), ("л."), ("мл.");
+
 
 select p.id, b.quantity as quant, s.name as sel_name, p.name as prod_name, p.img, p.added_on, p.price, m.name as m_unit 
 from product p, organization s, measure_unit m, balance b 
 where p.measure_unit_id = m.id and p.id = b.product_id;
 
+insert into organization (id, deliver_adres) values (999,"Ул.Калинина 17")
+update organization set deliver_adres = "Адрес" where id = 999;
 
 
 insert into category(name)
@@ -187,3 +232,73 @@ values
 ("Овощи"),
 ("Рыба"),
 ("Фрукты");
+
+
+insert into user
+(name, email, password, role_id, reg_date)
+values ("First Administrator", "admin_skladik@skladik.ru", md5("Rootofsys1"), 1, curdate());
+
+insert into order_status(name,rus_name )
+values 
+	("editing", "В процессе оформления"),
+	("waiting", "Отправлен на рассмотрение"),
+	("accepted", "Принят"),
+	("declined", "Отклонен"),
+	("delivered", "Доставлен"),
+	("canceled", "Отменен");
+
+
+
+select id,name,deliver_adres,about,email,phone,reg_date from organization;
+
+
+
+select bo.id as ord_id, bo.sent_on, bo.deliver_date, a.name as adr_name, st.name as status, bo.order_sum, bo.status_id, st.rus_name as st_rus_name
+from buy_order bo inner join order_status st on bo.status_id = st.id 
+left join address a on bo.address_id = a.id
+where bo.address_id = @org_id and not st.name = 'editing'
+
+
+
+select bo.id as ord_id, o.name as org_name, bo.sent_on, bo.deliver_date,a.name as adr_name, st.name as status, bo.order_sum, bo.status_id, st.rus_name as st_rus_name
+from buy_order bo inner join order_status st on bo.status_id = st.id
+inner join organization o on bo.buyer_id = o.id
+left join address a on organization_id = a.id
+where 
+not st.name = 'editing';
+
+
+select bo.id as ord_id, a.name as adr_name , bo.sent_on, bo.deliver_date, st.name as status, bo.order_sum, bo.status_id, st.rus_name as st_rus_name 
+from 
+buy_order bo inner join order_status st on bo.status_id = st.id 
+left join address a on organization_id = a.id
+where bo.buyer_id = @org_id;
+
+
+select bo.id as ord_id, bo.sent_on, bo.deliver_date, a.name as adr_name, st.name as status, bo.order_sum, bo.status_id, st.rus_name as st_rus_name
+from 
+buy_order bo inner join order_status st on bo.status_id = st.id 
+inner join organization o on bo.buyer_id = o.id
+left join address a on organization_id = a.id 
+where bo.buyer_id = 2;
+
+
+select bo.id as ord_id, bo.sent_on, bo.deliver_date, a.name as adr_name, st.name as status, bo.order_sum, bo.status_id, st.rus_name as st_rus_name 
+from 
+buy_order bo inner join order_status st on bo.status_id = st.id
+inner join organization o on bo.buyer_id = o.id 
+left join address a organization_id = a.id 
+where bo.buyer_id = 2 and a.id = 2;
+
+select bo.id as ord_id, bo.sent_on, bo.deliver_date, a.name as adr_name, st.name as status, bo.order_sum, bo.status_id, st.rus_name as st_rus_name
+from
+buy_order bo inner join order_status st on bo.status_id = st.id
+inner join organization o on bo.buyer_id = o.id
+left join address a on status_id = a.id
+where a.id = 2;
+
+
+
+
+
+

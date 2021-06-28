@@ -5,12 +5,10 @@ using System.Data;
 
 using Skladik.Utils;
 
-namespace Skladik.NewComponents
-{
-	// Элемент списка панелей пользователя
-	public class UserPanel : FlowLayoutPanel
-	{
-
+namespace Skladik.NewComponents {
+													// Элемент списка панелей пользователя
+	public class UserPanel : FlowLayoutPanel {
+		
 		public int UserId { get; set; }
 		public Label LName { get; set; }
 		public Label LEmail { get; set; }
@@ -18,8 +16,7 @@ namespace Skladik.NewComponents
 		public event EventHandler UserPanelClick;
 		public event EventHandler UserPanelDoubleClick;
 
-		public UserPanel()
-		{
+		public UserPanel() {
 			LName = new Label();
 			LEmail = new Label();
 
@@ -48,8 +45,7 @@ namespace Skladik.NewComponents
 			this.Controls.Add(LEmail);
 		}
 
-		public UserPanel(int id, string name, string email) : this()
-		{
+		public UserPanel(int id, string name, string email) : this() {
 
 			UserId = id;
 			LName.Text = name;
@@ -57,43 +53,35 @@ namespace Skladik.NewComponents
 
 		}
 
-		// Объединение нажатий
-		private void UnionClick(Object s, EventArgs e)
-		{
+													// Объединение нажатий
+		private void UnionClick(Object s, EventArgs e) {
 			if (UserPanelClick != null)
 				UserPanelClick(this, new EventArgs());
 		}
 
-		// Объединение двойных нажатий
-		private void UnionDoubleClick(Object s, EventArgs e)
-		{
+													// Объединение двойных нажатий
+		private void UnionDoubleClick(Object s, EventArgs e) {
 			if (UserPanelDoubleClick != null)
 				UserPanelDoubleClick(this, new EventArgs());
 		}
 
 	}
 
-
 	public delegate UserPanel DUserAddStrategy(UserPanel newUser, DataRow Row);
 
+													// Список панелей для вывода пользователей
+	public class UserIdBasedPanelList : PanelList {
 
-	// Список панелей для вывода пользователей
-	public class UserIdBasedPanelList : PanelList
-	{
-
-		// Алгоритм добавления нового пользователя
+													// Алгоритм добавления нового пользователя
 		public DUserAddStrategy UserAddStrategy { get; set; }
 
 		private DataTable dataSource;
-		public DataTable DataSource
-		{
+		public DataTable DataSource { 
 			get { return dataSource; }
-			set
-			{
+			set {
 				dataSource = value;
 
-				if (dataSource != null && UserAddStrategy != null)
-				{
+				if (dataSource != null && UserAddStrategy != null) {
 					foreach (DataRow Row in dataSource.Rows)
 						AddAPanel(UserAddStrategy(new UserPanel(), Row));
 
@@ -107,24 +95,22 @@ namespace Skladik.NewComponents
 
 		public UserPanel SelectedUser { get; private set; }
 
-		public int PanelsWidth { get; set; }
+		public int PanelsWidth { get; set;}
 
-		public UserIdBasedPanelList()
-		{
+		public UserIdBasedPanelList() {
 			SelectedUser = null;
 			PanelsWidth = Width - 40;
 		}
 
-		public void AddAPanel(UserPanel user)
-		{
-
+		public void AddAPanel(UserPanel user) {
+		
 			user.UserPanelClick += this.UserPanelClick;
 			user.UserPanelDoubleClick += this.UserPanelDoubleClick;
 
-			user.BackColor = Color.Aqua; ;
+			user.BackColor = Color.Aqua;
 			user.Width = PanelsWidth;
-
-			// Высота панели
+			
+													// Высота панели
 			Size ElementsSize = new Size(PanelsWidth, 1000);
 			user.MaximumSize = ElementsSize;
 			user.MinimumSize = new Size(PanelsWidth, 30);
@@ -134,57 +120,51 @@ namespace Skladik.NewComponents
 			Controls.Add(user);
 
 		}
-
-		// Перерисовка цветов
-		private void Redraw()
-		{
+						
+													// Перерисовка цветов
+		private void Redraw() {
 
 			if (SelectedUser != null)
-				foreach (Control elem in this.Controls)
-				{
+				foreach (Control elem in this.Controls) {
 
 					UserPanel UPanel = (UserPanel)elem;
 
-					if (UPanel.UserId == SelectedUser.UserId)
-					{
-
+					if (UPanel.UserId == SelectedUser.UserId) {
+					
 						SelectedUser = UPanel;
-						SelectedUser.BackColor = Color.Yellow; 
+						SelectedUser.BackColor = Color.Yellow;
 						return;
 
 					}
 				}
 		}
 
-		// Выбор пользователя
-		private void UserPanelClick(Object s, EventArgs e)
-		{
+													// Выбор пользователя
+		private void UserPanelClick(Object s, EventArgs e) {
 
 			UserPanel NewSelectedUser = (UserPanel)s;
 
-			if (SelectedUser == null || SelectedUser.UserId != NewSelectedUser.UserId)
-			{
-
+			 if (SelectedUser == null || SelectedUser.UserId != NewSelectedUser.UserId) {
+					
 				if (SelectedUser != null)
-					SelectedUser.BackColor = Color.Aqua; 
+					SelectedUser.BackColor = Color.Aqua;
 
-				NewSelectedUser.BackColor = Color.Yellow; ;
+				NewSelectedUser.BackColor = Color.Yellow;
 
 				SelectedUser = NewSelectedUser;
 				if (UserClick != null)
 					UserClick(s, e);
 
 			}
-
-
+			 
+			 
 		}
 
-		private void UserPanelDoubleClick(Object s, EventArgs e)
-		{
+		private void UserPanelDoubleClick(Object s, EventArgs e) {
 			if (UserDoubleClick != null)
 				UserDoubleClick(s, e);
 		}
-
+	
 	}
 
 }

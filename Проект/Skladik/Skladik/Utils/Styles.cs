@@ -9,7 +9,7 @@ namespace Skladik.Utils
 	public static class Styles
 	{
 
-		public readonly static Font TextFont = new Font("Helvetica", 10);
+		public readonly static Font TextFont = new Font("Comic Sans MS", 10);
 		public const int CategoriesWidth = 240;
 		public const int AccountPanelHeight = 90;
 		public const int ProductsPanelUpperHeight = 60;
@@ -20,8 +20,17 @@ namespace Skladik.Utils
 		public const int AddressListElemCount = 5;
 		public const int UserListElemCount = 5;
 		public const int ProductPanelElemCount = 20;
+		public const int OrderListElemCount = 20;
+		public const int OrderContentListElemCount = 5;
 		public const int AdminPanelListsElemCount = 5;
 		public readonly static Size ProductBandElementSize = new Size(200, 250);
+		public readonly static Size OrderListElementMaximumSize = new Size(725, 180);
+		public readonly static Size OrderListElementMinimumSize = new Size(725, 100);
+		public readonly static Size OrderContentListElementMaximumSize = new Size(520, 180);
+		public readonly static Size OrderContentListElementMinimumSize = new Size(520, 100);
+		public const int OrderContentFormButtonsHeight = 45;
+		public const int ProductsPerDocument = 20;
+
 
 		public const int OrganizationFormScrollPanelHeight = 900;
 
@@ -35,7 +44,7 @@ namespace Skladik.Utils
 		public static void TextStyle(Label aLabel, int size = 10)
 		{
 			aLabel.AutoSize = true;
-			aLabel.Font = new Font("Helvetica", size);
+			aLabel.Font = new Font("Comic Sans MS", size);
 		}
 
 		public static void TextBoxStyle(TextBox aTextBox)

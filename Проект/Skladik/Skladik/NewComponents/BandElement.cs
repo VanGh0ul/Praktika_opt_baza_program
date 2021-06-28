@@ -58,7 +58,8 @@ namespace Skladik.NewComponents {
 			PbImage.BackgroundImageLayout = ImageLayout.Zoom;
 			PbImage.Dock = DockStyle.Fill;
 
-			
+			this.BackColor = Color.Aqua;
+
 			Styles.TextStyle(LName);
 
 			

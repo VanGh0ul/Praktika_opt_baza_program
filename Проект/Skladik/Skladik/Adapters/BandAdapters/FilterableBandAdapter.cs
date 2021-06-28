@@ -7,32 +7,37 @@ using System.Threading.Tasks;
 
 using MySql.Data.MySqlClient;
 
-namespace Skladik.Adapters.BandAdapters {
+namespace Skladik.Adapters.BandAdapters
+{
 
 	public delegate MySqlCommand DSearchStrategy(MySqlCommand query, string FilterString);
 
 
-													// Адаптер списков, что поддерживает фильтрацию
-	public class FilterableBandAdapter : BandAdapter {
-		
+	// Адаптер списков, что поддерживает фильтрацию
+	public class FilterableBandAdapter : BandAdapter
+	{
+
 		public string FilterString { get; set; }
 		public DSearchStrategy SearchStrategy { get; set; }
 
 		public FilterableBandAdapter(MySqlCommand selectQuery, MySqlCommand selectCount, int recordsPerPage, MySqlConnection conn)
-			: base(selectQuery, selectCount, recordsPerPage, conn) { 
-		
+			: base(selectQuery, selectCount, recordsPerPage, conn)
+		{
+
 			FilterString = null;
 
 		}
 
-													// Сброс поиска
-		public void ResetFilter() {
+		// Сброс поиска
+		public void ResetFilter()
+		{
 			FilterString = null;
 		}
 
-													// Составление запроса
-		protected override MySqlCommand GenerateQuery(MySqlCommand query) {
-			
+		// Составление запроса
+		protected override MySqlCommand GenerateQuery(MySqlCommand query)
+		{
+
 			MySqlCommand Query;
 
 			if (FilterString != null && SearchStrategy != null)
@@ -44,6 +49,6 @@ namespace Skladik.Adapters.BandAdapters {
 			return Query;
 
 		}
-		
+
 	}
 }

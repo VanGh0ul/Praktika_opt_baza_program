@@ -91,7 +91,6 @@ namespace Skladik.Adapters
 				MeasureUnitId = QueryReader.GetInt32("measure_unit_id");
 				CategoryId = QueryReader.GetInt32("category_id");
 
-
 				Conn.Close();
 				// Получение данных поставщика
 
@@ -109,17 +108,19 @@ namespace Skladik.Adapters
 		}
 
 		// Добавляет товар, возвращает его ид
-		public int Insert(int userId, int sellerId, string name, string about, int price, int measureUnitId, int count, int categoryId, Image img)
+		public int Insert(int userId, string name, string about, int price, int measureUnitId, int count, int categoryId, Image img)
 		{
 
 			// Запрос добавления товара
+			int NewProductId;
+
 			using (MySqlCommand InsertProduct = Conn.CreateCommand())
 			{
 
 				InsertProduct.CommandText =
 					"insert into product " +
 					"(name, about, img, added_on, modified_on, price, measure_unit_id, category_id) " +
-					"values (@name, @about, @img, @added_on, @modified_on, @price, @measure_unit_id, @category_id)";
+					"values ( @name, @about, @img, @added_on, @modified_on, @price, @measure_unit_id, @category_id)";
 
 				InsertProduct.Parameters.Add("name", MySqlDbType.VarChar).Value = name;
 				InsertProduct.Parameters.Add("about", MySqlDbType.Text).Value = about;
@@ -134,11 +135,12 @@ namespace Skladik.Adapters
 
 				InsertProduct.ExecuteNonQuery();
 
+				// Получение ид добавленного товара
+				NewProductId = QueryUtils.GetLastInsertedId(Conn);
+
 				Conn.Close();
 
 			}
-			// Получение ид добавленного товара
-			int NewProductId = QueryUtils.GetLastInsertedId(Conn);
 
 			// Запрос создания баланса 
 			Balance.Insert(NewProductId, count, Conn);
@@ -154,6 +156,8 @@ namespace Skladik.Adapters
 		// Обновляет товар
 		public bool Update(int userId, string name, string about, int price, int measureUnitId, int count, int categoryId, Image img)
 		{
+
+			bool Result = false;
 
 			// Составление запроса
 			MySqlCommand Query = Conn.CreateCommand();
@@ -227,6 +231,8 @@ namespace Skladik.Adapters
 				// Обновление баланса
 				Balance.Update(Id, count, Conn);
 
+				Result = true;
+
 			}
 
 			if (CommandInner.Length > 0)
@@ -244,17 +250,32 @@ namespace Skladik.Adapters
 
 				this.ImageChanged = false;
 
-				return true;
+				Result = true;
 			}
 
-			return false;
+			return Result;
 
 		}
 
-		//Cделать полное "Удаление" товара
+		// "Удаление" товара
+		public void Delete()
+		{
+
+			// Изменеие статуса флага is_deleted
+			MySqlCommand Query = Conn.CreateCommand();
+			Query.CommandText = "update product set name = 'Товар удален' where id = @id";
+
+			Query.Parameters.Add("id", MySqlDbType.Int32).Value = Id;
+
+			Conn.Open();
+
+			Query.ExecuteNonQuery();
+
+			Conn.Close();
+
+		}
 
 
-		// Добавление в заказ
 		// Добавление в заказ
 		public void AddToOrder(int orgId, int quantity)
 		{
@@ -262,11 +283,16 @@ namespace Skladik.Adapters
 			MySqlCommand Query = Conn.CreateCommand();
 
 			// Поиск заказа со статусом "в процессе оформления"
+			// направленного на данного поставщика
 			Query.CommandText =
 				"select o.id from buy_order o, order_status os " +
 				"where " +
+					"o.buyer_id = @b_id and " +
 					"o.status_id = os.id and " +
 					"os.name = 'editing'";
+
+			Query.Parameters.Add("b_id", MySqlDbType.Int32).Value = orgId;
+			Query.Parameters.Add("s_id", MySqlDbType.Int32).Value = Seller.Id;
 
 			Conn.Open();
 
@@ -377,16 +403,17 @@ namespace Skladik.Adapters
 					"values (@b_id, (select id from order_status where name = 'editing'))";
 
 				Query.Parameters.Add("b_id", MySqlDbType.Int32).Value = orgId;
+				Query.Parameters.Add("s_id", MySqlDbType.Int32).Value = this.Seller.Id;
 
 				Conn.Open();
 
 				Query.ExecuteNonQuery();
 
-				Conn.Close();
+				//Conn.Close();
 
 				// Получение ид заказа
 				int OrderId = QueryUtils.GetLastInsertedId(Conn);
-
+				Conn.Close();
 				// Добавление товара к заказу
 				Query = Conn.CreateCommand();
 				Query.CommandText =
@@ -397,6 +424,7 @@ namespace Skladik.Adapters
 				Query.Parameters.Add("o_id", MySqlDbType.Int32).Value = OrderId;
 				Query.Parameters.Add("p_id", MySqlDbType.Int32).Value = this.Id;
 				Query.Parameters.Add("quant", MySqlDbType.Int32).Value = quantity;
+
 
 				Conn.Open();
 

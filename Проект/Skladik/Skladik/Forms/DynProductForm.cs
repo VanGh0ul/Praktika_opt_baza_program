@@ -9,88 +9,86 @@ using Skladik.Adapters;
 using Skladik.NewComponents;
 
 
-namespace Skladik.Forms
-{
-	public class DynProductForm : DynForm
-	{
-
-		const TableLayoutPanelCellBorderStyle BorderStyle = TableLayoutPanelCellBorderStyle.Inset;
+namespace Skladik.Forms {
+	public class DynProductForm : DynForm {
 
 		#region Объявления
 
-		// Адаптер формы
-		private ProductDataAdapter Product;
 
-		// Кнопки перехода
+													// Кнопки перехода
+		private BackMainHeader Header;
+
+													// Адаптер формы
+		private ProductDataAdapter Product;
+		/*
+													// Кнопки перехода
 		public Button BGoBack { get; private set; }
 		public Button BGoMain { get; private set; }
-
-		// Картинка продукта
+		*/
+													// Картинка продукта
 		public PictureBox ProductImg { get; private set; }
 
-		// Информация о поставщике
+													// Информация о поставщике
 		public PictureBox PbOrgAvatar { get; private set; }
 		public Label LOrgName { get; private set; }
 		public Label LOrgPhone { get; private set; }
 		public Label LOrgEmail { get; private set; }
 
-		// Даты добавления и модификации
+													// Даты добавления и модификации
 		public Label LAddDate { get; private set; }
 		public Label LModifiedDate { get; private set; }
 
-		// Название и описание продукта readonly
+													// Название и описание продукта readonly
 		public Label LProductName { get; private set; }
 
-		// Название и описание продукта writable
+													// Название и описание продукта writable
 		public TextBox TbProductName { get; private set; }
-
+	
 		public RichTextBox RtbAbout { get; private set; }
 
-		// Цена и количество readonly
+													// Цена и количество readonly
 		public Label LPrice { get; private set; }
 		public Label LQuantity { get; private set; }
 
-		// Цена и количество readonly writable
+													// Цена и количество readonly writable
 		public TextBox TbPrice { get; private set; }
 		public ComboBox CbMeasureUnits { get; private set; }
 		public TextBox TbQuantity { get; private set; }
 
-		// Элементы панели добавления к заказу
+													// Элементы панели добавления к заказу
 		public TextBox TbOrderQuantity { get; private set; }
 		public Label LMeasureUnit { get; private set; }
 		public Label LSum { get; private set; }
 		public Button BAddToOrder { get; private set; }
 
-		// Элементы панели изменения/добавления продукта
+													// Элементы панели изменения/добавления продукта
 		public OpenImageString OiString { get; private set; }
 		public ComboBox CbCategory { get; private set; }
 
-		// Элементы панели изменения продукта
+													// Элементы панели изменения продукта
 		public Button BSave { get; private set; }
 		public Button BCancel { get; private set; }
 		public Button BDelete { get; private set; }
 
-		// Элементы панели добавления продукта
+													// Элементы панели добавления продукта
 		public Button BAddProduct { get; private set; }
 		public Button BCancelAddProduct { get; private set; }
 
 		#endregion
 
-		// Настройка формы
-		protected override void SetUpMainForm()
-		{
+													// Настройка формы
+		protected override void SetUpMainForm() {
 			programForm.Controls.Clear();
 			Size FormSize = new Size(1000, 600);
+			programForm.Location = Styles.CentralizeFormByAnotherOne(FormSize, programForm.Location, programForm.Size);
 			programForm.MinimumSize = FormSize;
-			programForm.MaximumSize = new Size(1500, 800); ;
-			programForm.Location = new Point(10, 100);
+			programForm.MaximumSize = new Size(1500, 800);;
 			programForm.Size = FormSize;
 			programForm.Text = "Просмотр товара";
 		}
 
-		// Форма добавления нового товара
-		public override void Generate(Form1 aForm)
-		{
+													// Форма добавления нового товара
+		public override void Generate(Form1 aForm) {
 			base.Generate(aForm);
 
 			Product = new ProductDataAdapter(programForm.Conn);
@@ -103,52 +101,43 @@ namespace Skladik.Forms
 
 		}
 
-		// Формы открытия товара
-		public void Generate(Form1 aForm, int productId)
-		{
-
+													// Формы открытия товара
+		public void Generate(Form1 aForm, int productId) {
+			
 			base.Generate(aForm);
 
 			Product = new ProductDataAdapter(programForm.Conn);
-
-			// Попытка выгрузки данных
-			if (!Product.GetData(productId))
-			{
+			
+													// Попытка выгрузки данных
+			if (!Product.GetData(productId)) {
 				MessageBox.Show("Произошла ошибка при открытии товара, Вы будете перенаправлены на предыдущую форму");
 				programForm.History.Pop().RegenerateOldForm();
 				return;
 			}
-
-
-			if (programForm.User.Role == "admin")
-			{
-				// Администраторская форма
+				
+													
+			if (programForm.User.Role == "admin") {
+													// Администраторская форма
 				formContent = CreateAttachedUserUpdateForm();
 				FillWritableForm();
 				EditFormEventSetUp();
 
-
-			}
-			else if (programForm.User.Organization == null)
-			{
-				// Форма непривязанного пользователя
+													
+			} else if (programForm.User.Organization == null) {
+													// Форма непривязанного пользователя
 				formContent = CreateDetachedUserForm();
 				FillReadOnlyForm();
 				DetachedUserViewSetUp();
-
-			}
-			else if (programForm.User.Organization.Id == Product.Seller.Id)
-			{
-				// Форма изменения привязанного пользователя
+													
+			} else if (programForm.User.Organization.Id == Product.Seller.Id) {
+													// Форма изменения привязанного пользователя
 				formContent = CreateAttachedUserUpdateForm();
 				FillWritableForm();
 				EditFormEventSetUp();
 
-			}
-			else
-			{
-				// Форма привязанного пользователя для
-				// чужих товаров
+			} else {
+													// Форма привязанного пользователя для
+													// чужих товаров
 				formContent = CreateAttachedUserForeignForm();
 				FillReadOnlyForm();
 				OrderFormEventSetUp();
@@ -160,10 +149,9 @@ namespace Skladik.Forms
 		}
 
 		#region Рамки
-		// Основная рамка программы
-		private TableLayoutPanel CreateMainFrame()
-		{
-
+													// Основная рамка программы
+		private TableLayoutPanel CreateMainFrame() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Result.CellBorderStyle = BorderStyle;
 			Result.Dock = DockStyle.Fill;
@@ -175,25 +163,25 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
-
-			// Кнопки перехода
+													
+													// Кнопки перехода
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Верхняя часть
+													// Верхняя часть
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Нижняя часть
+													// Нижняя часть
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
 
@@ -201,9 +189,8 @@ namespace Skladik.Forms
 
 		}
 
-		// Рамка для информации о продукте
-		private TableLayoutPanel CreateProductInfoFrame()
-		{
+													// Рамка для информации о продукте
+		private TableLayoutPanel CreateProductInfoFrame() {
 
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, BorderStyle);
@@ -221,10 +208,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Создание двустрочной рамки для дат или цен
-		private TableLayoutPanel CreateDoubleRowedForLabelFrame()
-		{
-
+													// Создание двустрочной рамки для дат или цен
+		private TableLayoutPanel CreateDoubleRowedForLabelFrame() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
@@ -236,10 +222,10 @@ namespace Skladik.Forms
 
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
 
 			#endregion
@@ -253,49 +239,9 @@ namespace Skladik.Forms
 
 		#region Части формы
 
-		// Кнопки перехода		
-		private TableLayoutPanel CreateFormHeader()
-		{
-
-			TableLayoutPanel Result = new TableLayoutPanel();
-
-			Styles.ContentFramesStyle(Result, BorderStyle);
-
-			Result.ColumnCount = 3;
-			Result.RowCount = 1;
-
-			// Кнопка
-			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 40));
-			// Кнопка
-			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80));
-			// Пустое место
-			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
-			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-
-			BGoBack = new Button();
-			BGoBack.Text = "<";
-			BGoBack.Font = new Font("Helvetica", 8);
-			BGoBack.Dock = DockStyle.Fill;
-			BGoBack.Margin = new Padding(0);
-
-			BGoMain = new Button();
-			BGoMain.Text = "Главная";
-			BGoMain.Font = new Font("Helvetica", 8);
-			BGoMain.Dock = DockStyle.Fill;
-			BGoMain.Margin = new Padding(0);
-
-			Result.Controls.Add(BGoBack, 0, 0);
-			Result.Controls.Add(BGoMain, 1, 0);
-
-			return Result;
-
-		}
-
-		// Верхняя часть формы
-		private TableLayoutPanel CreateTopPartContent(TableLayoutPanel ProductInfo)
-		{
-
+													// Верхняя часть формы
+		private TableLayoutPanel CreateTopPartContent(TableLayoutPanel productInfo) {
+			
 			TableLayoutPanel TopPartContent = new TableLayoutPanel();
 
 			Styles.ContentFramesStyle(TopPartContent, BorderStyle);
@@ -309,32 +255,29 @@ namespace Skladik.Forms
 
 			TopPartContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Картинка 
+													// Картинка 
 			ProductImg = new PictureBox();
 			Styles.ImgStyle(ProductImg);
 
-			// Добавление содержимого верхней части
+													// Добавление содержимого верхней части
 			TopPartContent.Controls.Add(ProductImg, 0, 0);
-			TopPartContent.Controls.Add(ProductInfo, 2, 0);
+			TopPartContent.Controls.Add(productInfo, 2, 0);
 
 			return TopPartContent;
 
 		}
 
-
-
-		// Информация о продукте только для чтения
-		private TableLayoutPanel ReadOnlyProductInfo()
-		{
+													// Информация о продукте только для чтения
+		private TableLayoutPanel ReadOnlyProductInfo() {
 
 			TableLayoutPanel Result = CreateProductInfoFrame();
 
-			// Название продукта
+													// Название продукта
 			LProductName = new Label();
 			Styles.TextStyle(LProductName, 15);
 			LProductName.Margin = new Padding(5, 10, 5, 10);
 
-			// Описание продукта
+													// Описание продукта
 			RtbAbout = new RichTextBox();
 			Styles.RichTextBoxStyle(RtbAbout);
 			RtbAbout.ReadOnly = true;
@@ -347,16 +290,15 @@ namespace Skladik.Forms
 		}
 
 
-		private TableLayoutPanel WritableProductInfo()
-		{
-
+		private TableLayoutPanel WritableProductInfo() {
+			
 			TableLayoutPanel Result = CreateProductInfoFrame();
 
-			// Название продукта
+													// Название продукта
 			TbProductName = new TextBox();
 			Styles.TextBoxStyle(TbProductName);
 
-			// Описание продукта
+													// Описание продукта
 			RtbAbout = new RichTextBox();
 			Styles.RichTextBoxStyle(RtbAbout);
 
@@ -367,12 +309,11 @@ namespace Skladik.Forms
 
 		}
 
-		// Нижняя часть формы
-		private TableLayoutPanel CreateBottomPartContent(TableLayoutPanel PriceFrame, TableLayoutPanel CartFrame)
-		{
+													// Нижняя часть формы
+		private TableLayoutPanel CreateBottomPartContent(TableLayoutPanel PriceFrame, TableLayoutPanel CartFrame) {
 
 			#region Рамка нижней части
-			// Содержимое нижней части формы
+													// Содержимое нижней части формы
 			TableLayoutPanel BottomPartContent = new TableLayoutPanel();
 
 			Styles.ContentFramesStyle(BottomPartContent, BorderStyle);
@@ -380,21 +321,21 @@ namespace Skladik.Forms
 			BottomPartContent.ColumnCount = 3;
 			BottomPartContent.RowCount = 1;
 
-			// Организация и даты
+													// Организация и даты
 			BottomPartContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
-			// Промежуток
+													// Промежуток
 			BottomPartContent.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
 
-			// Правая часть
+													// Правая часть
 			BottomPartContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
 			BottomPartContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-
+			
 			#endregion
 
-			#region Рамка левой ниженей части
-			// Содержимое нижней левой части формы
+			#region Рамка левой нижней части
+													// Содержимое нижней левой части формы
 			TableLayoutPanel OrgAndDatesFrame = new TableLayoutPanel();
 			Styles.ContentFramesStyle(OrgAndDatesFrame, BorderStyle);
 
@@ -402,24 +343,24 @@ namespace Skladik.Forms
 			OrgAndDatesFrame.RowCount = 3;
 
 			OrgAndDatesFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
-			// Организация
+			
+													// Организация
 			OrgAndDatesFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 80));
 
-			// Промежуток
+													// Промежуток
 			OrgAndDatesFrame.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Даты
+													// Даты
 			OrgAndDatesFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
 
 			OrgAndDatesFrame.Controls.Add(CreateOrgContent(), 0, 0);
 			OrgAndDatesFrame.Controls.Add(CreateDatesContent(), 0, 2);
-
+			
 			#endregion
 
 			#region Рамка правой нижней части
 
-			// Содержимое нижней правой части формы
+													// Содержимое нижней правой части формы
 			TableLayoutPanel PriceAndCartFrame = new TableLayoutPanel();
 			Styles.ContentFramesStyle(PriceAndCartFrame, BorderStyle);
 
@@ -427,14 +368,14 @@ namespace Skladik.Forms
 			PriceAndCartFrame.RowCount = 3;
 
 			PriceAndCartFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
-			// Организация
+			
+													// Организация
 			PriceAndCartFrame.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
 
-			// Промежуток
+													// Промежуток
 			PriceAndCartFrame.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Даты
+													// Даты
 			PriceAndCartFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
 			PriceAndCartFrame.Controls.Add(PriceFrame, 0, 0);
@@ -447,17 +388,14 @@ namespace Skladik.Forms
 			BottomPartContent.Controls.Add(PriceAndCartFrame, 2, 0);
 
 			return BottomPartContent;
-
+		
 		}
 
 
-
-
 		#region Левая часть нижней части формы
-		// Содержимое панели с информацией о организации
-		private TableLayoutPanel CreateOrgContent()
-		{
-
+													// Содержимое панели с информацией о организации
+		private TableLayoutPanel CreateOrgContent() {
+			
 			TableLayoutPanel Result = new TableLayoutPanel();
 
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
@@ -470,38 +408,38 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Картинка текст
+													// Картинка текст
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 			#endregion
 
 			#region Компоненты
 
-			// Постоянный текст "Поставщик"
+													// Постоянный текст "Поставщик"
 			Label LSellerText = new Label();
-			LSellerText.Text = "Поставщик:";
+			LSellerText.Text = "Поставщик: SKLADIK";
 			Styles.TextStyle(LSellerText, 15);
 			LSellerText.Margin = new Padding(0, 0, 0, 10);
 
 			#region Картинка и название организации
-			// Контейнер картинки и названия оргизации
+													// Контейнер картинки и названия оргизации
 			TableLayoutPanel OrgAvatarAndName = new TableLayoutPanel();
 			Styles.ContentFramesStyle(OrgAvatarAndName, TableLayoutPanelCellBorderStyle.None);
 			OrgAvatarAndName.ColumnCount = 2;
@@ -511,25 +449,25 @@ namespace Skladik.Forms
 
 			OrgAvatarAndName.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Картинка организации
+													// Картинка организации
 			PbOrgAvatar = new PictureBox();
 			Styles.ImgStyle(PbOrgAvatar);
 			PbOrgAvatar.Margin = new Padding(10, 0, 10, 0);
 
-			// Название организации
+													// Название организации
 			LOrgName = new Label();
 			Styles.TextStyle(LOrgName);
 			LOrgName.Anchor = AnchorStyles.Left;
 
 			#endregion
-
+			
 			LOrgPhone = new Label();
 			Styles.TextStyle(LOrgPhone);
 
 			LOrgEmail = new Label();
 			Styles.TextStyle(LOrgEmail);
 
-			// Добавление элементов в контейнер
+													// Добавление элементов в контейнер
 			OrgAvatarAndName.Controls.Add(PbOrgAvatar, 0, 0);
 			OrgAvatarAndName.Controls.Add(LOrgName, 1, 0);
 
@@ -544,11 +482,10 @@ namespace Skladik.Forms
 			return Result;
 
 		}
-
-		// Содержимое панель дат
-		private TableLayoutPanel CreateDatesContent()
-		{
-
+		
+													// Содержимое панель дат
+		private TableLayoutPanel CreateDatesContent() {
+			
 			TableLayoutPanel Result = CreateDoubleRowedForLabelFrame();
 
 			LAddDate = new Label();
@@ -565,15 +502,14 @@ namespace Skladik.Forms
 			return Result;
 
 		}
-
+		
 		#endregion
 
 		#region Правая часть нижней части формы
 
-		// Цена товара только для просмотра
-		private TableLayoutPanel ReadOnlyPriceFrame()
-		{
-
+													// Цена товара только для просмотра
+		private TableLayoutPanel ReadOnlyPriceFrame() {
+		
 			TableLayoutPanel Result = CreateDoubleRowedForLabelFrame();
 
 			LPrice = new Label();
@@ -591,11 +527,10 @@ namespace Skladik.Forms
 
 		}
 
-
-		// Цена товара для редактирования
-		private TableLayoutPanel WritablePriceFrame()
-		{
-
+		
+													// Цена товара для редактирования
+		private TableLayoutPanel WritablePriceFrame() {
+		
 			TableLayoutPanel Result = CreateDoubleRowedForLabelFrame();
 
 			#region Всё касаемо цены (1 строки панели)
@@ -606,40 +541,40 @@ namespace Skladik.Forms
 			PriceFrame.ColumnCount = 5;
 			PriceFrame.RowCount = 1;
 
-			// "Цена: "
+													// "Цена: "
 			PriceFrame.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-			// Поле
+													// Поле
 			PriceFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-			// " руб. ~ 1 "
+													// " руб. ~ 1 "
 			PriceFrame.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-			// Комбобокс
+													// Комбобокс
 			PriceFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-			// Пустой промежуток
+													// Пустой промежуток
 			PriceFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
 			PriceFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Текст
+													// Текст
 			Label LPriceText = new Label();
 			Styles.TextStyle(LPriceText);
 			LPriceText.Text = "Цена:";
 			LPriceText.Anchor = AnchorStyles.Left;
 
-			// Поле ввода
+													// Поле ввода
 			TbPrice = new TextBox();
 			Styles.TextBoxStyle(TbPrice);
 
-			// Текст
+													// Текст
 			Label LAfterText = new Label();
 			Styles.TextStyle(LAfterText);
 			LAfterText.Text = "руб. ~ 1";
 			LAfterText.Anchor = AnchorStyles.Left;
 
-			// Комбобокс
+													// Комбобокс
 			CbMeasureUnits = new ComboBox();
 			Styles.ComboBoxStyle(CbMeasureUnits);
 
@@ -658,13 +593,13 @@ namespace Skladik.Forms
 			QuantityFrame.ColumnCount = 3;
 			QuantityFrame.RowCount = 1;
 
-			// "В наличии: "
+													// "В наличии: "
 			QuantityFrame.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
-			// Поле
+													// Поле
 			QuantityFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-			// Промежуток
+													// Промежуток
 			QuantityFrame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
 
@@ -678,7 +613,7 @@ namespace Skladik.Forms
 			TbQuantity = new TextBox();
 			Styles.TextBoxStyle(TbQuantity);
 
-
+			
 			QuantityFrame.Controls.Add(LQuantityText);
 			QuantityFrame.Controls.Add(TbQuantity);
 
@@ -686,15 +621,14 @@ namespace Skladik.Forms
 
 			Result.Controls.Add(PriceFrame, 0, 0);
 			Result.Controls.Add(QuantityFrame, 0, 1);
-
+			
 			return Result;
-
+		
 		}
-
-		// Панель добавления в заказ
-		private TableLayoutPanel CartBottomFrame()
-		{
-
+		
+													// Панель добавления в заказ
+		private TableLayoutPanel CartBottomFrame() {
+			
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
 
@@ -707,44 +641,44 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Текст
+													// Текст
 			Result.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Поле ввода количества
+													// Поле ввода количества
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Вывод суммы
+													// Вывод суммы
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Кнопка добавления
+													// Кнопка добавления
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
 			#endregion
 
 			#region Компоненты
-
-			// "Добавить к заказу:"
+				
+													// "Добавить к заказу:"
 			Label LAddToOrderText = new Label();
 			LAddToOrderText.Text = "Добавить к заказу:";
 			Styles.TextStyle(LAddToOrderText, 15);
 			LAddToOrderText.Margin = new Padding(0, 0, 0, 10);
 
-			// Поле ввода
+													// Поле ввода
 			#region Ввод количества
 
 			TableLayoutPanel InputQuantFrame = new TableLayoutPanel();
@@ -760,7 +694,7 @@ namespace Skladik.Forms
 
 			TbOrderQuantity = new TextBox();
 			Styles.TextBoxStyle(TbOrderQuantity);
-
+			
 			LMeasureUnit = new Label();
 			Styles.TextStyle(LMeasureUnit);
 			LMeasureUnit.Anchor = AnchorStyles.Left;
@@ -770,7 +704,7 @@ namespace Skladik.Forms
 
 			#endregion
 
-			// Вывод суммы
+													// Вывод суммы
 			#region Вывод суммы
 
 			TableLayoutPanel SumFrame = new TableLayoutPanel();
@@ -784,13 +718,13 @@ namespace Skladik.Forms
 
 			SumFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Надпись
+													// Надпись
 			Label LSumText = new Label();
 			Styles.TextStyle(LSumText);
 			LSumText.Text = "Сумма:";
 			LSumText.Anchor = AnchorStyles.Left;
 
-			// Вывод саомй суммы
+													// Вывод суммы
 			LSum = new Label();
 			Styles.TextStyle(LSum);
 			LSum.Anchor = AnchorStyles.Left;
@@ -801,7 +735,7 @@ namespace Skladik.Forms
 
 			#endregion
 
-			// Кнопка добавления
+													// Кнопка добавления
 			BAddToOrder = new Button();
 			BAddToOrder.Size = new Size(100, 25);
 			BAddToOrder.Font = Styles.TextFont;
@@ -818,11 +752,10 @@ namespace Skladik.Forms
 			return Result;
 
 		}
-
-		// Панель изменения товара
-		private TableLayoutPanel WritableBottomFrame(TableLayoutPanel buttons)
-		{
-
+		
+													// Панель изменения товара
+		private TableLayoutPanel WritableBottomFrame(TableLayoutPanel buttons) {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
 
@@ -835,37 +768,37 @@ namespace Skladik.Forms
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 5));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
-			// Выбор картинки
+													// Выбор картинки
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 5));
 
-			// Выбор категории
+													// Выбор категории
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 25));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Кнопки
+													// Кнопки
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
 
-			// Промежуток
+													// Промежуток
 			Result.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
 
 			#endregion
 
 			#region Компоненты
-			// Компонент для открытия изображения
+													// Компонент для открытия изображения
 			OiString = new OpenImageString();
 			Styles.TextStyle(OiString.LComment);
 			OiString.LComment.Text = "Изображение товара: ";
 			OiString.BOpenImg.Font = Styles.TextFont;
 
-			// Выбор категории товаров
+													// Выбор категории товаров
 			#region Категория товаров
 
 			TableLayoutPanel CategoryFrame = new TableLayoutPanel();
@@ -880,14 +813,14 @@ namespace Skladik.Forms
 
 			CategoryFrame.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-			// Текст "Категория товаров: "
+													// Текст "Категория товаров: "
 			Label LCategoryText = new Label();
 			Styles.TextStyle(LCategoryText);
 			LCategoryText.Text = "Категория товара:";
 			LCategoryText.Anchor = AnchorStyles.Left;
 			LCategoryText.Margin = new Padding(0);
 
-			// Выбор категории
+													// Выбор категории
 			CbCategory = new ComboBox();
 			Styles.ComboBoxStyle(CbCategory);
 
@@ -901,35 +834,34 @@ namespace Skladik.Forms
 
 			#endregion
 
-			// Добавление кнопок
+													// Добавление кнопок
 			Result.Controls.Add(buttons, 1, 5);
 
 			return Result;
-
+		
 		}
-
-		// Сохранть, отменить и удалить товар для панели изменения товара
-		private TableLayoutPanel ProductUpdateButtons()
-		{
-
+		
+													// Сохранть, отменить и удалить товар для панели изменения товара
+		private TableLayoutPanel ProductUpdateButtons() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
 
 			#region Рамка
-
+			
 			Result.ColumnCount = 4;
 			Result.RowCount = 1;
 
-			// Промежуток
+													// Промежуток
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Кнопка
+													// Кнопка
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-			// Кнопка
+													// Кнопка
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-			// Кнопка
+													// Кнопка
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
 			Result.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -938,7 +870,7 @@ namespace Skladik.Forms
 
 			#region Кнопки
 
-			// Кнопки управления изменяемым товаром
+													// Кнопки управления изменяемым товаром
 			BSave = new Button();
 			Styles.ButtonStyle(BSave);
 			BSave.Text = "Сохранить изменения";
@@ -959,31 +891,30 @@ namespace Skladik.Forms
 			Result.Controls.Add(BCancel, 2, 0);
 			Result.Controls.Add(BDelete, 3, 0);
 
-			#endregion
+			#endregion	
 
 			return Result;
 
 		}
 
-		// Добавить товар, отменить добавление для панели изменения товара
-		private TableLayoutPanel ProductInsertButtons()
-		{
-
+													// Добавить товар, отменить добавление для панели изменения товара
+		private TableLayoutPanel ProductInsertButtons() {
+		
 			TableLayoutPanel Result = new TableLayoutPanel();
 			Styles.ContentFramesStyle(Result, TableLayoutPanelCellBorderStyle.None);
 
 			#region Рамка
-
+			
 			Result.ColumnCount = 3;
 			Result.RowCount = 1;
 
-			// Промежуток
+													// Промежуток
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-			// Кнопка
+													// Кнопка
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-			// Кнопка
+													// Кнопка
 			Result.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
 
@@ -993,7 +924,7 @@ namespace Skladik.Forms
 
 			#region Кнопки
 
-			// Кнопки управления изменяемым товаром
+													// Кнопки управления изменяемым товаром
 			BAddProduct = new Button();
 			Styles.ButtonStyle(BAddProduct);
 			BAddProduct.Text = "Добавить товар";
@@ -1008,13 +939,13 @@ namespace Skladik.Forms
 			Result.Controls.Add(BAddProduct, 1, 0);
 			Result.Controls.Add(BCancelAddProduct, 2, 0);
 
-			#endregion
+			#endregion	
 
 			return Result;
-
+		
 		}
 
-
+		
 		#endregion
 
 		#endregion
@@ -1022,26 +953,30 @@ namespace Skladik.Forms
 
 		#region Формы
 
-		// Создание формы - основы для остальных
-		private TableLayoutPanel CreateMainForm(TableLayoutPanel ProductInfoFrame, TableLayoutPanel PriceFrame, TableLayoutPanel CartFrame)
-		{
-
+													// Создание формы - основы для остальных
+		private TableLayoutPanel CreateMainForm(TableLayoutPanel ProductInfoFrame, TableLayoutPanel PriceFrame, TableLayoutPanel CartFrame) {
+		
 			TableLayoutPanel Foundation = CreateMainFrame();
+			
+			Header = new BackMainHeader();
 
-			Foundation.Controls.Add(CreateFormHeader(), 1, 1);
+			Styles.ContentFramesStyle(Header, BorderStyle);
+			Header.BGoBack.Font = new Font("Comic Sans MS", 8);
+			Header.BGoMain.Font = new Font("Comic Sans MS", 8);
+
+			Foundation.Controls.Add(Header, 1, 1);
 			Foundation.Controls.Add(CreateTopPartContent(ProductInfoFrame), 1, 3);
 			Foundation.Controls.Add(CreateBottomPartContent(PriceFrame, CartFrame), 1, 5);
-
+			
 
 			return Foundation;
 
 		}
 
-		// Создание формы для просмотра товаров 
-		// от лица непривязанного пользователя
-		private TableLayoutPanel CreateDetachedUserForm()
-		{
-
+													// Создание формы для просмотра товаров 
+													// от лица непривязанного пользователя
+		private TableLayoutPanel CreateDetachedUserForm() {
+			
 			return CreateMainForm(
 				ReadOnlyProductInfo(),
 				ReadOnlyPriceFrame(),
@@ -1049,11 +984,10 @@ namespace Skladik.Forms
 			);
 
 		}
-
-		// Создание формы для просмотра товаров 
-		// от лица привязанного пользователя
-		private TableLayoutPanel CreateAttachedUserForeignForm()
-		{
+		
+													// Создание формы для просмотра товаров 
+													// от лица привязанного пользователя
+		private TableLayoutPanel CreateAttachedUserForeignForm() {
 
 			return CreateMainForm(
 				ReadOnlyProductInfo(),
@@ -1063,10 +997,9 @@ namespace Skladik.Forms
 
 		}
 
-		// Создание формы для изменения товаров 
-		// привязанными пользователями
-		private TableLayoutPanel CreateAttachedUserUpdateForm()
-		{
+													// Создание формы для изменения товаров 
+													// привязанными пользователями
+		private TableLayoutPanel CreateAttachedUserUpdateForm() {
 
 			return CreateMainForm(
 				WritableProductInfo(),
@@ -1076,11 +1009,10 @@ namespace Skladik.Forms
 
 		}
 
-		// Создание формы для добавления товаров 
-		// привязанными пользователями
-		private TableLayoutPanel CreateAttachedUserInsertForm()
-		{
-
+													// Создание формы для добавления товаров 
+													// привязанными пользователями
+		private TableLayoutPanel CreateAttachedUserInsertForm() {
+			
 			return CreateMainForm(
 				WritableProductInfo(),
 				WritablePriceFrame(),
@@ -1094,11 +1026,10 @@ namespace Skladik.Forms
 
 		#region Вывод данных
 
-		// Заполнение комбобокса с единицами измерения
-		private void FillMeasureUnitComboBox()
-		{
-
-			// Получение данных из БД
+													// Заполнение комбобокса с единицами измерения
+		private void FillMeasureUnitComboBox() {
+		
+													// Получение данных из БД
 			MySqlCommand Query = programForm.Conn.CreateCommand();
 			Query.CommandText = "select * from measure_unit";
 
@@ -1107,9 +1038,9 @@ namespace Skladik.Forms
 			DataSet DSet = new DataSet();
 
 			MeasureUnitAdapter.Fill(DSet);
-			// programForm.Conn.Close()
+			programForm.Conn.Close();
 
-			// Указание источника CB
+													// Указание источника CB
 			CbMeasureUnits.DataSource = DSet.Tables[0];
 			CbMeasureUnits.DisplayMember = "name";
 			CbMeasureUnits.ValueMember = "id";
@@ -1117,11 +1048,10 @@ namespace Skladik.Forms
 
 		}
 
-		// Заполнение комбобокса с категориями
-		private void FillCategoryComboBox()
-		{
-
-			// Получение данных из БД
+													// Заполнение комбобокса с категориями
+		private void FillCategoryComboBox() {
+			
+																// Получение данных из БД
 			MySqlCommand Query = programForm.Conn.CreateCommand();
 			Query.CommandText = "select * from category";
 
@@ -1130,9 +1060,9 @@ namespace Skladik.Forms
 			DataSet DSet = new DataSet();
 
 			CategoryAdapter.Fill(DSet);
-			// programForm.Conn.Close()
+			programForm.Conn.Close();
 
-			// Указание источника CB
+													// Указание источника CB
 			CbCategory.DataSource = DSet.Tables[0];
 			CbCategory.DisplayMember = "name";
 			CbCategory.ValueMember = "id";
@@ -1140,18 +1070,14 @@ namespace Skladik.Forms
 
 		}
 
-		// Заполнение данных о поставщике
-		private void FillOrganizationAndDates()
-		{
-			PbOrgAvatar.BackgroundImage = Product.Seller.Img;
-			LOrgName.Text = Product.Seller.Name;
-			LOrgPhone.Text = "Телефон: " + Product.Seller.Phone;
-			LOrgEmail.Text = "Эл. адрес: " + Product.Seller.Email;
+													// Заполнение данных о поставщике
+		private void FillOrganizationAndDates() {
+			LOrgPhone.Text = "Телефон: 89162679615";
+			LOrgEmail.Text = "Эл. адрес: skladik@skladik.ru";
 		}
 
-		// Заполнение формы только для чтения
-		private void FillReadOnlyForm()
-		{
+													// Заполнение формы только для чтения
+		private void FillReadOnlyForm() {
 
 			ProductImg.BackgroundImage = Product.Img;
 			LProductName.Text = Product.Name;
@@ -1166,13 +1092,12 @@ namespace Skladik.Forms
 
 			LAddDate.Text = "Дата добавления: " + Product.AddedOn.ToShortDateString();
 			LModifiedDate.Text = "Дата модификации: " + Product.ModifiedOn.ToShortDateString();
-
+		
 		}
 
-		// Заполнение формы для изменения
-		private void FillWritableForm()
-		{
-
+													// Заполнение формы для изменения
+		private void FillWritableForm() {
+		
 			ProductImg.BackgroundImage = Product.Img;
 			TbProductName.Text = Product.Name;
 
@@ -1191,12 +1116,11 @@ namespace Skladik.Forms
 			LModifiedDate.Text = "Дата модификации: " + Product.ModifiedOn.ToShortDateString();
 		}
 
-		// Заполнение формы для добавления
-		private void FillInsertForm()
-		{
-
+													// Заполнение формы для добавления
+		private void FillInsertForm() {
+			
 			ProductImg.BackgroundImage = Properties.Resources.no_image;
-			TbProductName.Text = "";
+			TbProductName.Text ="";
 
 			RtbAbout.Text = "";
 
@@ -1211,39 +1135,35 @@ namespace Skladik.Forms
 
 			LAddDate.Text = "Дата добавления: " + DateTime.Now.ToShortDateString();
 			LModifiedDate.Text = "Дата модификации: " + DateTime.Now.ToShortDateString();
-
+		
 		}
 
 		#endregion
 
 
 		#region Другие события компонентов формы
-
-		// После выбора изображения, 
-		// её перенос в компонент
-		private void AfterImageChoosed(Object s, EventArgs e)
-		{
-
-			if (QueryUtils.CheckImageWeight(OiString.FileName, 4200000))
-			{
+		
+													// После выбора изображения, 
+													// её перенос в компонент
+		private void AfterImageChoosed(Object s, EventArgs e) {
+			
+			if (QueryUtils.CheckImageWeight(OiString.FileName, 4200000)) {
 				ProductImg.BackgroundImage = Image.FromFile(OiString.FileName);
-
+				
 				Product.ImageChanged = true;
-
-			}
-			else
+			
+			} else
 				MessageBox.Show("Размер изображения не должен превышать 4 МБ");
 
 		}
-
-		// Вычисление конечной суммы позиции
-		// при изменении текста поля количества
-		private void CalculateSumOnQuantityChange(Object s, EventArgs e)
-		{
-
-			// Проверка количества
+		
+													// Вычисление конечной суммы позиции
+													// при изменении текста поля количества
+		private void CalculateSumOnQuantityChange(Object s, EventArgs e) {
+		
+													// Проверка количества
 			int Temp;
-			if (QueryUtils.CheckNum(TbOrderQuantity.Text, out Temp, 0, QueryUtils.MaxQuantityInOrder))
+			if (QueryUtils.CheckNum(TbOrderQuantity.Text, out Temp, 0, QueryUtils.MaxQuantityInOrder)) 
 				if (Temp > Product.Quantity)
 					LSum.Text = "Недостаточно товара";
 				else
@@ -1251,18 +1171,17 @@ namespace Skladik.Forms
 
 			else
 				LSum.Text = "";
-
+			
 
 		}
-
-		// Открытие личного кабинета 
-		// организации при нажатии на её картинку
-		// или название
-		private void OpenOrganizationAccount(Object s, EventArgs e)
-		{
-
-			// programForm.History.Push(this);
-			MessageBox.Show("Переход к личному кабинету организации");
+		
+													// Открытие личного кабинета 
+													// организации при нажатии на её картинку
+													// или название
+		private void OpenOrganizationAccount(Object s, EventArgs e) {
+		
+			programForm.History.Push(this);
+			new DynOrganizationForm().Generate(programForm, Product.Seller.Id);
 
 		}
 
@@ -1270,56 +1189,52 @@ namespace Skladik.Forms
 
 
 		#region Установка событий
+					
+													// Общие для всех форм события					
+		private void EventSetUp() {
+													// Переход назад
+			Header.BGoBack.Click += ProductCancelButtonClick;
 
-		// Общие для всех форм события					
-		private void EventSetUp()
-		{
-			// Переход назад
-			BGoBack.Click += ProductCancelButtonClick;
-
-			// Переход на главн. форму
-			BGoMain.Click += delegate (Object s, EventArgs args) {
+													// Переход на главн. форму
+			Header.BGoMain.Click += delegate(Object s, EventArgs args) { 
 				new DynProductsBandForm().Generate(programForm);
 			};
 
 		}
 
-		// Открытие личного кабинета организации
-		private void OrganizationAccountOpenSetUp()
-		{
-
+													// Открытие личного кабинета организации
+		private void OrganizationAccountOpenSetUp() {
+			
 			PbOrgAvatar.Click += OpenOrganizationAccount;
 			LOrgName.Click += OpenOrganizationAccount;
 
 		}
 
-		// События формы добавления
-		private void InsertFormEventSetUp()
-		{
+													// События формы добавления
+		private void InsertFormEventSetUp() {
 
 			EventSetUp();
 
-			// Перенос картинки
+													// Перенос картинки
 			OiString.AfterImgLoad += AfterImageChoosed;
 
-			// Добавление товара
+													// Добавление товара
 			BAddProduct.Click += ProductAddButtonClick;
-
-			// Отмена добавления товара
+			
+													// Отмена добавления товара
 			BCancelAddProduct.Click += ProductCancelButtonClick;
 
 		}
 
-		// События формы изменения товара
-		private void EditFormEventSetUp()
-		{
-
+													// События формы изменения товара
+		private void EditFormEventSetUp() {
+		
 			EventSetUp();
 
-			// Перенос картинки
+													// Перенос картинки
 			OiString.AfterImgLoad += AfterImageChoosed;
 
-			// События кнопок управления товаром
+													// События кнопок управления товаром
 			BSave.Click += SaveButtonClick;
 			BCancel.Click += CancelButtonClick;
 			BDelete.Click += DeleteButtonClick;
@@ -1328,16 +1243,15 @@ namespace Skladik.Forms
 
 		}
 
-		// События формы добавления товара к заказу
-		private void OrderFormEventSetUp()
-		{
-
+													// События формы добавления товара к заказу
+		private void OrderFormEventSetUp() {
+			
 			EventSetUp();
-
-			// Вычисление суммы позиции при вводе 
+			
+													// Вычисление суммы позиции при вводе 
 			TbOrderQuantity.TextChanged += CalculateSumOnQuantityChange;
 
-			// Добавление к заказу
+													// Добавление к заказу
 			BAddToOrder.Click += AddToOrderButtonClick;
 
 			OrganizationAccountOpenSetUp();
@@ -1345,68 +1259,61 @@ namespace Skladik.Forms
 		}
 
 
-		private void DetachedUserViewSetUp()
-		{
-
+		private void DetachedUserViewSetUp() {
+			
 			EventSetUp();
 			OrganizationAccountOpenSetUp();
 
 		}
-
+		
 		#endregion
 
 
 		#region Управление товарами
 
 		#region Добавление товара
-
-		// Добавление товара					
-		private void ProductAddButtonClick(Object s, EventArgs e)
-		{
-
+	
+													// Добавление товара					
+		private void ProductAddButtonClick(Object s, EventArgs e) {
+			
 			string Name = TbProductName.Text.Trim();
 			string About = RtbAbout.Text.Trim();
 			Image Img = ProductImg.BackgroundImage;
 
 			int Price;
 			int Quantity;
+			
 
+													// Проверка данных
 
-			// Проверка данных
-
-			// Проверка названия
-			if (!QueryUtils.CheckName(Name))
-			{
+													// Проверка названия
+			if (!QueryUtils.CheckName(Name)) {
 				MessageBox.Show("Название должно содержать от 4 до 50 букв");
 				return;
 			}
 
-			// Проверка цены
-			if (!QueryUtils.CheckNum(TbPrice.Text.Trim(), out Price, 0, QueryUtils.MaxPrice))
-			{
+													// Проверка цены
+			if (!QueryUtils.CheckNum(TbPrice.Text.Trim(), out Price, 0, QueryUtils.MaxPrice)) {
 				MessageBox.Show("Цена недопустима, она должна содержать значение в диапазоне от 1 до " + QueryUtils.MaxPrice.ToString());
 				return;
 			}
 
-			// Проверка цены
-			if (!QueryUtils.CheckNum(TbQuantity.Text.Trim(), out Quantity, 0, QueryUtils.MaxQuantity))
-			{
+													// Проверка количества
+			if (!QueryUtils.CheckNum(TbQuantity.Text.Trim(), out Quantity, 0, QueryUtils.MaxQuantity)) {
 				MessageBox.Show("Количество недопустимо, оно должно содержать значение в диапазоне от 1 до " + QueryUtils.MaxQuantity.ToString());
 				return;
 			}
 
-			// Проверка существования единицы измерения
-			if (CbMeasureUnits.SelectedValue == null)
-			{
+													// Проверка существования единицы измерения
+			if (CbMeasureUnits.SelectedValue == null) {
 				MessageBox.Show("Выбранная единица измерения не существует");
 				return;
 			}
 
 			int MeasureUnitId = Convert.ToInt32(CbMeasureUnits.SelectedValue);
 
-			// Проверка существования категории
-			if (CbCategory.SelectedValue == null)
-			{
+													// Проверка существования категории
+			if (CbCategory.SelectedValue == null) {
 				MessageBox.Show("Выбранная категория не существует");
 				return;
 			}
@@ -1414,10 +1321,9 @@ namespace Skladik.Forms
 			int CategoryId = Convert.ToInt32(CbCategory.SelectedValue);
 
 
-			// Отправка запроса добавления товара
+													// Отправка запроса добавления товара
 			int Id = Product.Insert(
 				programForm.User.Id,
-				programForm.User.Organization.Id,
 				Name,
 				About,
 				Price,
@@ -1431,19 +1337,17 @@ namespace Skladik.Forms
 
 			MessageBox.Show("Товар был успешно добавлен");
 		}
-
-		// Отмена добавления товара
-		private void ProductCancelButtonClick(Object s, EventArgs e)
-		{
+		
+													// Отмена добавления товара
+		private void ProductCancelButtonClick(Object s, EventArgs e) {
 			programForm.History.Pop().RegenerateOldForm();
 		}
-
+		
 		#endregion
 
 		#region Изменение товара
-		// Кнопка сохранения изменений товара
-		private void SaveButtonClick(Object s, EventArgs e)
-		{
+													// Кнопка сохранения изменений товара
+		private void SaveButtonClick(Object s, EventArgs e) {
 
 			string Name = TbProductName.Text.Trim();
 			string About = RtbAbout.Text.Trim();
@@ -1451,43 +1355,38 @@ namespace Skladik.Forms
 
 			int Price;
 			int Quantity;
+			
 
+													// Проверка данных
 
-			// Проверка данных
-
-			// Проверка названия
-			if (!QueryUtils.CheckName(Name))
-			{
+													// Проверка названия
+			if (!QueryUtils.CheckName(Name)) {
 				MessageBox.Show("Название должно содержать от 4 до 50 букв");
 				return;
 			}
 
-			// Проверка цены
-			if (!QueryUtils.CheckNum(TbPrice.Text.Trim(), out Price, 0, QueryUtils.MaxPrice))
-			{
+													// Проверка цены
+			if (!QueryUtils.CheckNum(TbPrice.Text.Trim(), out Price, 0, QueryUtils.MaxPrice)) {
 				MessageBox.Show("Цена недопустима, она должна содержать значение в диапазоне от 1 до " + QueryUtils.MaxPrice.ToString());
 				return;
 			}
 
-			// Проверка цены
-			if (!QueryUtils.CheckNum(TbQuantity.Text.Trim(), out Quantity, 0, QueryUtils.MaxQuantity))
-			{
+													// Проверка цены
+			if (!QueryUtils.CheckNum(TbQuantity.Text.Trim(), out Quantity, 0, QueryUtils.MaxQuantity)) {
 				MessageBox.Show("Количество недопустимо, оно должно содержать значение в диапазоне от 1 до " + QueryUtils.MaxQuantity.ToString());
 				return;
 			}
 
-			// Проверка существования единицы измерения
-			if (CbMeasureUnits.SelectedValue == null)
-			{
+													// Проверка существования единицы измерения
+			if (CbMeasureUnits.SelectedValue == null) {
 				MessageBox.Show("Выбранная единица измерения не существует");
 				return;
 			}
 
 			int MeasureUnitId = Convert.ToInt32(CbMeasureUnits.SelectedValue);
 
-			// Проверка существования категории
-			if (CbCategory.SelectedValue == null)
-			{
+													// Проверка существования категории
+			if (CbCategory.SelectedValue == null) {
 				MessageBox.Show("Выбранная категория не существует");
 				return;
 			}
@@ -1495,7 +1394,7 @@ namespace Skladik.Forms
 			int CategoryId = Convert.ToInt32(CbCategory.SelectedValue);
 
 
-			// Отправка
+													// Отправка
 			if (
 				Product.Update(
 					programForm.User.Id,
@@ -1507,61 +1406,55 @@ namespace Skladik.Forms
 					CategoryId,
 					Img
 				)
-			)
-			{
-				// Обновление формы
+			) {
+													// Обновление формы
 				Product.GetData(Product.Id);
 				FillWritableForm();
 
 				MessageBox.Show("Товар был успешно изменен");
 
-			}
+			} 
 
 		}
 
-		// Кнопка отмены изменений товара
-		private void CancelButtonClick(Object s, EventArgs e)
-		{
-
+													// Кнопка отмены изменений товара
+		private void CancelButtonClick(Object s, EventArgs e) {
+		
 			FillWritableForm();
 
 		}
 
 
 		#endregion
-		// Удаление товара
-		private void DeleteButtonClick(Object s, EventArgs e)
-		{
+													// Удаление товара
+		private void DeleteButtonClick(Object s, EventArgs e) {
+			
+													// Изменение статус is_deleted
+			Product.Delete();
 
-			// Удаление товара
-			//Product.Delete();
-
-			// Переход на форму просмотра товаров
+													// Переход на форму просмотра товаров
 			new DynProductsBandForm().Generate(programForm);
 
 		}
 
-		// Кнопка добавления 
-		// товара в заказ
-		private void AddToOrderButtonClick(Object s, EventArgs e)
-		{
-
+													// Кнопка добавления 
+													// товара в заказ
+		private void AddToOrderButtonClick(Object s, EventArgs e) {
+			
 			int Quantity;
 
-			// Проверка количества 
-			if (!QueryUtils.CheckNum(TbOrderQuantity.Text, out Quantity, 0, QueryUtils.MaxQuantityInOrder))
-			{
+													// Проверка количества 
+			if (!QueryUtils.CheckNum(TbOrderQuantity.Text, out Quantity, 0, QueryUtils.MaxQuantityInOrder)) {
 				MessageBox.Show("Количество может быть числом от 1 до " + QueryUtils.MaxQuantityInOrder.ToString());
 				return;
 			}
 
-			if (Quantity > Product.Quantity)
-			{
+			if (Quantity > Product.Quantity) {
 				MessageBox.Show("Указанное число превышает количество товара, что есть у продавца");
 				return;
 			}
 
-			// Добавление в заказ
+													// Добавление в заказ
 			Product.AddToOrder(programForm.User.Organization.Id, Quantity);
 
 			MessageBox.Show("Товар добавлен в заказ");

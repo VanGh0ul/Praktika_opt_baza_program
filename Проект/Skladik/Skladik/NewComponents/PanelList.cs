@@ -12,13 +12,15 @@ namespace Skladik.NewComponents {
 		public PanelList() {
 
 			Dock = DockStyle.Fill;
-			AutoScroll = true;
-			VerticalScroll.Enabled = true;
-			this.FlowDirection = FlowDirection.TopDown;
-			this.WrapContents = false;
+			AutoScroll = false;
 			HorizontalScroll.Enabled = false;
 			HorizontalScroll.Visible = false;
-			// Margin = new Padding(0, 0, 15, 0);
+			VerticalScroll.Enabled = true;
+			AutoScroll = true;
+			this.FlowDirection = FlowDirection.TopDown;
+			this.WrapContents = false;
+			
+			//Margin = new Padding(0, 0, 15, 0);
 
 		}
 

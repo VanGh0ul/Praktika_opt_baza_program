@@ -23,13 +23,13 @@ namespace Skladik.NewComponents {
 
 			BGoBack = new Button();
 			BGoBack.Text = "<";
-			// BGoBack.Font = new Font("Helvetica", 8);
+			// BGoBack.Font = new Font("Comic Sans MS", 8);
 			BGoBack.Dock = DockStyle.Fill;
 			BGoBack.Margin = new Padding(0);
 
 			BGoMain = new Button();
 			BGoMain.Text = "Главная";
-			// BGoMain.Font = new Font("Helvetica", 8);
+			// BGoMain.Font = new Font("Comic Sans MS", 8);
 			BGoMain.Dock = DockStyle.Fill;
 			BGoMain.Margin = new Padding(0);
 
